@@ -1,3 +1,8 @@
 /tmp/
 
-task/
+test/
+
+.vscode/
+
+*.out
+*.o

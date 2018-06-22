@@ -6,7 +6,7 @@ using namespace std;
 
 #define rep(i,n) for(int i=0;i<(n);i++)
 
-vector<int> toposo(vector<vector<int>> &g){
+vector<int> toposo(const vector<vector<int>> &g){
   int n=g.size();
   vector<int> deg_in(n, 0);
   rep(i, n)for(int j: g[i]) deg_in[j]++;

@@ -6,6 +6,7 @@ using namespace std;
 
 #define rep(i,n) for(int i=0;i<(n);i++)
 
+// gがDAGのとき使える
 vector<int> toposo(const vector<vector<int>> &g){
   int n=g.size();
   vector<int> deg_in(n, 0);

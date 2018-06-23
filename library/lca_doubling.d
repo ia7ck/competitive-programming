@@ -16,27 +16,22 @@ class tree{
     g[u]~=v; g[v]~=u;
   }
   void init(){
-    void dfs(int i=0, int j=-1){
+    void dfs(int i, int j=-1){
       par[i][0]=j;
       if(j>=0) dep[i]=dep[j]+1;
-      foreach(k; g[i]){
-        if(j!=k) dfs(k, i);
-      }
+      foreach(k; g[i])if(j!=k) dfs(k, i);
     }
-    dfs();
-    for(int j=0; j<len-1; j++)foreach(i; 0..n){
+    dfs(0);
+    for(int j=0; j<len-1; j++)foreach(i; 0..n)
       if(par[i][j]>=0) par[i][j+1]=par[par[i][j]][j];
-    }
   }
   int getLca(int s, int t){
     if(dep[s]<dep[t]) swap(s, t);
-    foreach(i; 0..len){
+    foreach(i; 0..len)
       if((dep[s]-dep[t])&(1<<i)) s=par[s][i];
-    }
     if(s==t) return s;
-    for(auto i=len-1; i>=0; i--){
+    for(auto i=len-1; i>=0; i--)
       if(par[s][i]!=par[t][i]) s=par[s][i], t=par[t][i];
-    }
     return par[s][0];
   }
 }

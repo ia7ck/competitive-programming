@@ -24,28 +24,34 @@ struct StronglyConnectedComponents{
     for(int j: g[i])if(visited[j]==false) dfs(j);
     order.push_back(i);
   }
-  void rev_dfs(int i, int itr){
+  void rev_dfs(int i, int _n){
     if(root[i]>=0) return;
-    root[i]=itr;
-    for(int j: rev_g[i])if(root[j]<0) rev_dfs(j, itr);
+    root[i]=_n;
+    for(int j: rev_g[i])if(root[j]<0) rev_dfs(j, _n);
   }
-  void compress(){
+  void build(){
     rep(i, g.size())if(visited[i]==false) dfs(i);
     assert(order.size()==g.size());
     reverse(order.begin(), order.end());
-    int itr=0;
-    for(int i: order)if(root[i]<0) rev_dfs(i, itr++);
+    int _n=0;
+    for(int i: order)if(root[i]<0) rev_dfs(i, _n++);
     rep(i, g.size()) assert(root[i]>=0);
-  }
-  void make(){
-    int nn=0;
-    rep(i, g.size()) nn=max(nn, root[i]+1);
-    h.resize(nn);
+    h.resize(_n);
     rep(i, g.size())for(int j: g[i]){
-      int ii=root[i], jj=root[j];
-      if(ii==jj) continue;
-      h[ii].push_back(jj);
+      int _i=root[i], _j=root[j];
+      if(_i==_j) continue;
+      h[_i].push_back(_j);
     }
+  }
+  int solve(int s){
+    vector<int> deg_in(h.size(), 0);
+    rep(i, h.size())for(int j: h[i]) deg_in[j]++;
+    int need=0;
+    rep(i, h.size()){
+      if(i==root[s]) continue;
+      if(deg_in[i]==0) need++;
+    }
+    return need;
   }
 };
 
@@ -59,18 +65,9 @@ int main(){
   }
 
   StronglyConnectedComponents scc(g);
-  scc.compress();
-  scc.make();
+  scc.build();
 
-  int nn=scc.h.size();
-  vector<int> deg_in(nn, 0);
-  rep(i, nn)for(int j: scc.h[i]) deg_in[j]++;
-  int need=0;
-  rep(i, nn){
-    if(i==scc.root[s]) continue;
-    if(deg_in[i]==0) need++;
-  }
-  cout<< need<< endl;
+  cout<< scc.solve(s)<< endl;
 
   return 0;
 }

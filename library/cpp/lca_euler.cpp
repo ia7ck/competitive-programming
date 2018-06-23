@@ -116,3 +116,7 @@ int main(){
 
   return 0;
 }
+
+/*
+  https://beta.atcoder.jp/contests/abc014/submissions/2715737
+*/

@@ -56,4 +56,5 @@ void rd(T...)(ref T x){
 
 /+
   https://beta.atcoder.jp/contests/abc088/submissions/2642911
+  https://beta.atcoder.jp/contests/soundhound2018-summer-qual/submissions/2852092
 +/

@@ -4,5 +4,7 @@ test/
 
 .vscode/
 
+nimcache/
+
 *.out
 *.o

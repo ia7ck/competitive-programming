@@ -1,60 +1,35 @@
-void main(){
-  import std.stdio, std.string, std.conv, std.algorithm;
-
-  alias T=int;
-  const inf=1e9.to!(T);  
-  struct Edge{int to; T cost;}
-  int n, m; rd(n, m);
-  auto g=new Edge[][](n);
-  foreach(_; 0..m){
-    int a, b;
-    T c;
-    rd(a, b, c);
-    g[a]~=Edge(b, c);
-    g[b]~=Edge(a, c);
-  }
-
-  /+
-    a1 b1 c1
-    a2 b2 c2
-    .
-    .
-    am bm cm
-  +/
-
-  T[] dijkstra(Edge[][] g, int s){
-    auto d=new T[](n);
-    fill(d, inf);
-    struct P{int v; T d;}
-    import std.container;
-    auto Q=new RedBlackTree!(P, "a.d<b.d", true);
-    Q.insert(P(s, 0)); d[s]=0;
-    while(Q.empty==false){
-      auto cur=Q.front; Q.removeFront;
-      foreach(e; g[cur.v]){
-        if(d[e.to]<=d[cur.v]+e.cost) continue;
-        d[e.to]=d[cur.v]+e.cost;
-        Q.insert(P(e.to, d[e.to]));
-      }
-    }
-    return d;
-  }
-
-  auto d=dijkstra(g, 0);
-
-  /+
-    d[i]=inf => s->iのパスなし
-  +/
+struct Edge(T){
+  int to;
+  T cost;
 }
 
-void rd(T...)(ref T x){
-  import std.stdio, std.string, std.conv;
-  auto l=readln.split;
-  assert(l.length==x.length);
-  foreach(i, ref e; x) e=l[i].to!(typeof(e));
+T[] dijkstra(T, alias edge=Edge!(T))(edge[][] g, int s){
+  import std.algorithm, std.container;
+  const inf=T.max;
+  auto dist=new T[](g.length);
+  fill(dist, inf);
+  dist[s]=T.init;
+  alias P=edge;
+  auto q=new BinaryHeap!(Array!P, "a.cost>b.cost");
+  q.insert(P(s, dist[s]));
+  while(q.length>0){
+    auto cost=q.front.cost;
+    auto u=q.front.to;
+    q.removeFront;
+    foreach(e; g[u]){
+      if(cost+e.cost<dist[e.to]){
+        dist[e.to]=cost+e.cost;
+        q.insert(P(e.to, dist[e.to]));
+      }
+    }
+  }
+  return dist;
 }
 
 /+
+  http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3139560#1
+
+  未検証
   https://beta.atcoder.jp/contests/abc088/submissions/2642911
   https://beta.atcoder.jp/contests/soundhound2018-summer-qual/submissions/2852092
 +/

@@ -30,3 +30,5 @@ vector<T> dijkstra(vector<vector<Edge<T>>> &g, int s){
   }
   return dist;
 }
+
+// http://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=3139546#1

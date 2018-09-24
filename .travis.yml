@@ -1,4 +1,7 @@
-language: ruby
-rvm: 2.5.0
-
-script: rake unittest
+matrix:
+  include:
+    - language: d
+      
+    - language: ruby
+      rvm: 2.5.0
+      script: rake unittest

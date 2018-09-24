@@ -33,7 +33,7 @@ class Combination {
     foreach (i; 0 .. n) {
       assert(fac[i] * inv[i] % mod == 1);
     }
-    assert(c.cmb(4, 0) == 1);
+    assert(c.cmb(4, 0) == -1);
     assert(c.cmb(4, 2) == 6);
     assert(c.cmb(4, 4) == 1);
     assert(c.cmb(4, 5) == 0);

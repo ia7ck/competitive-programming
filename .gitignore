@@ -1,9 +1,7 @@
 tmp/
-
 test/
-
+rand/
 .vscode/
-
 nimcache/
 
 *.out

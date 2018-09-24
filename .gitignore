@@ -6,3 +6,4 @@ nimcache/
 
 *.out
 *.o
+*.lst

@@ -1,5 +1,7 @@
-void main() {
-  import std.stdio, std.string, std.conv, std.algorithm;
+// dmd -unittest -main -cov -run prime_factorize.d
+
+unittest {
+  import std.algorithm : reduce;
 
   foreach (x; [2, 3, 4, 5, 6, 7, 8, 9, 10, 10 ^^ 9 + 7]) {
     auto pf = prime_fact(x);

@@ -1,13 +1,11 @@
-void main() {
-  import std.algorithm;
-
-  const long mod = 998244353;
-  const size_t M = 10 ^^ 5;
-  static long[M] fac, inv;
-  { // init
+class Combination {
+  const static size_t n = 10 ^^ 5;
+  const static long mod = 998244353;
+  static long[n] fac, inv;
+  this() {
     fac[0] = fac[1] = 1;
-    foreach (i; 2 .. M)
-      fac[i] = i * fac[i - 1] % mod;
+    foreach (i; 2 .. n)
+      fac[i] = fac[i - 1] * i % mod;
     long _pow(long a, long x) {
       if (x == 0)
         return 1;
@@ -19,9 +17,10 @@ void main() {
         return _pow(a * a % mod, x / 2);
     }
 
-    foreach (i; 0 .. M)
+    foreach (i; 0 .. n)
       inv[i] = _pow(fac[i], mod - 2);
   }
+
   long cmb(long nn, long rr) {
     if (nn < rr)
       return 0;
@@ -29,12 +28,16 @@ void main() {
       return fac[nn] * inv[rr] % mod * inv[nn - rr] % mod;
   }
 
-  foreach (i; 0 .. M)
-    assert(fac[i] * inv[i] == 1);
-  assert(cmb(4, 0) == 1);
-  assert(cmb(4, 2) == 6);
-  assert(cmb(4, 4) == 1);
-  assert(cmb(4, 5) == 0);
+  unittest {
+    Combination c = new Combination;
+    foreach (i; 0 .. n) {
+      assert(fac[i] * inv[i] % mod == 1);
+    }
+    assert(c.cmb(4, 0) == 1);
+    assert(c.cmb(4, 2) == 6);
+    assert(c.cmb(4, 4) == 1);
+    assert(c.cmb(4, 5) == 0);
+  }
 }
 
 /*

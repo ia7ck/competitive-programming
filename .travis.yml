@@ -1,7 +1,7 @@
 matrix:
   include:
     - language: d
-      
+      script: "dmd --version"
     - language: ruby
       rvm: 2.5.0
       script: rake unittest

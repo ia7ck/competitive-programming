@@ -1,3 +1,0 @@
-language: d
-install: "rvm use 2.5.0 --install --binary --fuzzy"
-script: "rake unittest"

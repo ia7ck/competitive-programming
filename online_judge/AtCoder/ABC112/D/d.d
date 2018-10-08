@@ -5,11 +5,7 @@ void main() {
   rd(n, m);
   import std.math : sqrt;
 
-  if (n == 1) {
-    writeln(m);
-    return;
-  }
-  for (long k = 6 * 10L ^^ 8; k >= 1; k--) {
+  for (long k = m; k >= 1; k--) {
     if (m >= k * n && (m - k * n) % k == 0) {
       writeln(k);
       return;

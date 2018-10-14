@@ -46,8 +46,8 @@ void main() {
   }
 
   // writefln("%(%(%c%)\n%)", c);
-  writeln(num);
-  // writefln("%(%(%c%)\n%)", _c);
+  // writeln(num);
+  writefln("%(%(%c%)\n%)", _c);
 }
 
 void afill(Range, Type)(Range r, Type value) {

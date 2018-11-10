@@ -3,18 +3,18 @@ void main() {
 
   long n, m;
   rd(n, m);
-  import std.math : sqrt;
-
-  for (long k = m; k >= 1; k--) {
-    if (m >= k * n && (m - k * n) % k == 0) {
-      writeln(k);
-      return;
+  long ans = 1;
+  for (long k = 1; k * k <= m; k++) {
+    if (m % k == 0) {
+      if (n * k <= m) {
+        ans = max(ans, k);
+      }
+      if (n * (m / k) <= m) {
+        ans = max(ans, m / k);
+      }
     }
   }
-
-  import std.exception : enforce;
-
-  enforce(false);
+  writeln(ans);
 }
 
 void rd(T...)(ref T x) {

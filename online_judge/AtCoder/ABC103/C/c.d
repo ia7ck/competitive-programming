@@ -1,25 +1,12 @@
 void main() {
   import std.stdio, std.string, std.conv, std.algorithm;
 
-  int n, m;
-  rd(n, m);
-  struct T {
-    int a, b;
-  }
-
-  auto es = new T[](m);
-  foreach (i; 0 .. m)
-    rd(es[i].a, es[i].b);
-
-  sort!"a.b<b.b"(es);
-  int last = -1, cnt = 0;
-  foreach (e; es) {
-    if (last <= e.a) {
-      last = e.b;
-      cnt++;
-    }
-  }
-  writeln(cnt);
+  int n;
+  rd(n);
+  auto s = readln.split
+    .to!(int[])
+    .reduce!((res, a) => (res + a - 1));
+  writeln(s - 1);
 
 }
 

@@ -1,25 +1,18 @@
 void main() {
   import std.stdio, std.string, std.conv, std.algorithm;
 
-  int n, m;
-  rd(n, m);
-  struct T {
-    int a, b;
-  }
+  auto s = readln.chomp.to!(char[]);
+  auto t = readln.chomp.to!(char[]);
 
-  auto es = new T[](m);
-  foreach (i; 0 .. m)
-    rd(es[i].a, es[i].b);
-
-  sort!"a.b<b.b"(es);
-  int last = -1, cnt = 0;
-  foreach (e; es) {
-    if (last <= e.a) {
-      last = e.b;
-      cnt++;
+  foreach (i; 0 .. s.length) {
+    if (s == t) {
+      writeln("Yes");
+      return;
     }
+    s = s[$ - 1] ~ s[0 .. ($ - 1)];
   }
-  writeln(cnt);
+
+  writeln("No");
 
 }
 

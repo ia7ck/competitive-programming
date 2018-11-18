@@ -1,33 +1,37 @@
-void main(){
+void main() {
   import std.stdio, std.string, std.conv, std.algorithm;
-  import std.array;
 
-  int n, m; rd(n, m);
-  auto a=readln.split.to!(long[]).map!((e)=>(e%m)).array;
+  int n, m;
+  rd(n, m);
+  auto a = readln.split.to!(long[]);
 
-  auto cul=new long[](n+1);
-  foreach(i; 0..n) cul[i+1]=(cul[i]+a[i])%m;
-  long[long] freq;
-  freq[0]=0;
-  long tot=0;
-  foreach(x; cul[1..$]){
-    if(x==0){
-      tot+=(++freq[x]);
-      continue;
+  long[long] map;
+  long tot = 0, mulm = 0;
+  for (int i = 0; i < n; i++) {
+    if (i > 0) {
+      a[i] += a[i - 1];
     }
-    if(x in freq){
-      tot+=freq[x]++;
-    }else{
-      freq[x]=1;
+    if (a[i] % m == 0) {
+      tot += (++mulm);
+    } else {
+      if (a[i] % m in map)
+        tot += map[a[i] % m];
+      if (a[i] % m in map)
+        map[a[i] % m]++;
+      else
+        map[a[i] % m] = 1;
     }
   }
   writeln(tot);
-
 }
 
-void rd(T...)(ref T x){
-  import std.stdio, std.string, std.conv;
-  auto l=readln.split;
-  assert(l.length==x.length);
-  foreach(i, ref e; x) e=l[i].to!(typeof(e));
+void rd(T...)(ref T x) {
+  import std.stdio : readln;
+  import std.string : split;
+  import std.conv : to;
+
+  auto l = readln.split;
+  assert(l.length == x.length);
+  foreach (i, ref e; x)
+    e = l[i].to!(typeof(e));
 }

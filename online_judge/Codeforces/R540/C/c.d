@@ -19,19 +19,18 @@ void main() {
   }
   if (n % 2 == 0) {
     auto mat = new int[][](n, n);
-    int k = 0;
     foreach (i; 0 .. n / 2) {
       foreach (j; 0 .. n / 2) {
-        if (k < n * n) {
-          if (freq[a[k]] > 0 && freq[a[k]] % 4 == 0) {
-            mat[i][j] = mat[n - i - 1][j] = mat[i][n - j - 1] = mat[n - i - 1][n - j - 1] = a[k];
-            freq[a[k]] -= 4;
-            k += 4;
+        foreach (el; a) {
+          if (freq[el] > 0 && freq[el] % 4 == 0) {
+            mat[i][j] = mat[n - i - 1][j] = mat[i][n - j - 1] = mat[n - i - 1][n - j - 1] = el;
+            freq[el] -= 4;
+            break;
           }
         }
       }
     }
-    if (k != n * n) {
+    if (freq.any!((el) => (el > 0))) {
       writeln("NO");
     } else {
       writeln("YES");
@@ -46,28 +45,14 @@ void main() {
         break;
       }
     }
-    foreach (i; 0 .. n / 2) {
-      foreach (el; a) {
-        if (freq[el] % 4 == 2) {
-          mat[i][n / 2] = mat[n - i - 1][n / 2] = el;
-          freq[el] -= 2;
-          break;
-        }
-      }
-    }
-    foreach (j; 0 .. n / 2) {
-      foreach (el; a) {
-        if (freq[el] % 4 == 2) {
-          mat[n / 2][j] = mat[n / 2][n - j - 1] = el;
-          freq[el] -= 2;
-          break;
-        }
-      }
+    if (freq.any!((el) => (el & 1))) {
+      writeln("NO");
+      return;
     }
     foreach (i; 0 .. n / 2) {
       foreach (j; 0 .. n / 2) {
         foreach (el; a) {
-          if (freq[el] > 0 && freq[el] % 4 == 0) {
+          if (freq[el] > 2) {
             mat[i][j] = mat[n - i - 1][j] = mat[i][n - j - 1] = mat[n - i - 1][n - j - 1] = el;
             freq[el] -= 4;
             break;
@@ -97,18 +82,10 @@ void main() {
         }
       }
     }
-    if (freq.any!((el) => (el != 0))) {
+    if (freq.any!((el) => (el > 0))) {
       writeln("NO");
     } else {
       writeln("YES");
-      foreach (i; 0 .. n) {
-        foreach (j; 0 .. n) {
-          enforce(mat[i][j] > 0);
-          enforce(mat[i][j] == mat[n - i - 1][j]);
-          enforce(mat[i][j] == mat[i][n - j - 1]);
-          enforce(mat[i][j] == mat[n - i - 1][n - j - 1]);
-        }
-      }
       writefln("%(%(%s %)\n%)", mat);
     }
   }
@@ -117,7 +94,7 @@ void main() {
 /*
 
 7
-1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 3 3
+5 9 5 4 1 9 8 4 5 1 4 10 7 7 8 4 2 4 4 5 4 4 10 3 4 6 8 1 9 9 5 6 8 7 1 8 6 6 7 5 3 1 1 4 7 2 3 3 8
 
 */
 

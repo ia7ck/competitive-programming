@@ -9,13 +9,14 @@ proc main() =
   type P = object
     x: int64
     t: int
+    idx: int
   var pts = newSeq[P](0)
   for it in a:
     pts.add(P(x: it, t: 0))
   for it in b:
     pts.add(P(x: it, t: 1))
-  for it in c:
-    pts.add(P(x: it, t: 2))
+  for i, it in c:
+    pts.add(P(x: it, t: 2, idx: i))
   pts.sort(proc(le, ri: P): int = cmp(le.x, ri.x))
   var
     nex_0 = newSeqWith(pts.len, -1)
@@ -31,7 +32,7 @@ proc main() =
   var
     prev_0 = newSeqWith(pts.len, pts.len+1)
     prev_1 = newSeqWith(pts.len, pts.len+1)
-    tab = newTable[int64, int64]()
+    ans = newSeq[int64](q)
   for i in 0..<pts.len:
     if pts[i].t == 0:
       prev_0[i] = i
@@ -60,10 +61,10 @@ proc main() =
             mn = min(mn,
               min(abs(pts[i].x - x0), abs(pts[i].x - x1)) * 2 +
               max(abs(pts[i].x - x0), abs(pts[i].x - x1)))
-      tab[pts[i].x] = mn
+      ans[pts[i].idx] = mn
     if i+1 < pts.len:
       prev_0[i+1] = prev_0[i]
       prev_1[i+1] = prev_1[i]
-  for it in c:
-    echo tab[it]
+  for it in ans:
+    echo it
 main()

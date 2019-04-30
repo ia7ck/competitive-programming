@@ -1,69 +1,75 @@
 #include <algorithm>
+#include <deque>
 #include <iostream>
 #include <map>
 #include <queue>
-#include <set>
-#include <tuple>
 #include <vector>
 
 #define rep(i, n) for (int i = 0; i < (int)(n); i++)
 using namespace std;
 
 struct Edge {
-  int to, c;
+  int to, cost;
 };
 
 struct P {
-  int d, v, pc;
-  bool operator<(const auto &rhs) const { return d > rhs.d; }
+  int v, d;
 };
+
+template <typename T> vector<T> dijkstra(vector<vector<Edge>> &g, int s) {
+  const auto inf = numeric_limits<T>::max();
+  vector<T> dist((int)g.size(), inf);
+  dist[s] = 0;
+  priority_queue<pair<T, int>> q;
+  q.push({-dist[s], s});
+  while (q.size() > 0) {
+    T cost;
+    int u;
+    tie(cost, u) = q.top();
+    q.pop();
+    cost *= -1;
+    for (auto e : g[u]) {
+      if (cost + e.cost < dist[e.to]) {
+        dist[e.to] = cost + e.cost;
+        q.push({-dist[e.to], e.to});
+      }
+    }
+  }
+  return dist;
+}
 
 int main() {
 
   int n, m, k;
   cin >> n >> m >> k;
-  vector<vector<Edge>> g(n);
-  map<pair<int, int>, int> edge_map;
+
+  map<pair<int, int>, int> idx;
+  vector<vector<Edge>> g(n + m * 2 + 1);
+  auto add_edge = [&](pair<int, int> from, pair<int, int> to, int cost) {
+    if (!idx.count(from)) idx[from] = idx.size();
+    if (!idx.count(to)) idx[to] = idx.size();
+    g[idx[from]].push_back(Edge{idx[to], cost});
+  };
   rep(i, m) {
     int a, b, c;
     cin >> a >> b >> c;
     a--;
     b--;
-    g[a].push_back(Edge{b, c});
-    g[b].push_back(Edge{a, c});
-    edge_map[{min(a, b), max(a, b)}] = c;
+    add_edge({a, c}, {b, c}, 0);
+    add_edge({b, c}, {a, c}, 0);
+    add_edge({a, c}, {a, 0}, 0);
+    add_edge({b, c}, {b, 0}, 0);
+    add_edge({a, 0}, {b, c}, 1);
+    add_edge({b, 0}, {a, c}, 1);
   }
-  const int inf = 1000000000;
-  vector<map<int, int>> dist(n);
-  rep(i, n) {
-    for (auto e : g[i]) {
-      dist[i][e.c] = inf;
-    }
-  }
-  priority_queue<P> q;
-  for (auto e : g[0]) {
-    dist[e.to][e.c] = 0;
-    q.push(P{0, e.to, e.c});
-  }
-  while (q.size() > 0) {
-    auto cur = q.top();
-    q.pop();
-    for (auto e : g[cur.v]) {
-      auto nd = cur.d + (e.c == cur.pc ? 0 : 1);
-      if (nd < dist[e.to][e.c]) {
-        dist[e.to][e.c] = nd;
-        q.push(P{nd, e.to, e.c});
-      }
-    }
-  }
-  auto mn = inf;
-  for (auto pair : dist[n - 1]) {
-    mn = min(mn, pair.second);
-  }
-  if (mn == inf) {
-    cout << -1 << endl;
-  } else {
-    cout << (int64_t)(mn + 1) * k << endl;
-  }
+
+  const auto inf = numeric_limits<int>::max();
+  if (!idx.count({0, 0})) idx[{0, 0}] = idx.size();
+  auto dist = dijkstra<int>(g, idx[{0, 0}]);
+  if (!idx.count({n - 1, 0})) idx[{n - 1, 0}] = idx.size();
+  auto ans = (int64_t)dist[idx[{n - 1, 0}]] * k;
+  if (ans >= inf) ans = -1;
+  cout << ans << endl;
+
   return 0;
 }

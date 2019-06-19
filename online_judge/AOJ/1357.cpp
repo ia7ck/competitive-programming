@@ -1,31 +1,35 @@
-#include<iostream>
-#include<vector>
-#include<algorithm>
-#include<cmath>
+#include <algorithm>
+#include <cmath>
+#include <iostream>
+#include <vector>
+
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
 using namespace std;
 
-#define rep(i,n) for(int i=0;i<(n);i++)
+double SQ(double x) { return x * x; }
 
-void chmax(double &l, double r){if(l<r)l=r;}
+int main() {
 
-int main(){
-
-  int n; cin>> n;
-  vector<double> r(n);
-  rep(i, n) cin>> r[i];
-
-  vector<double> x(n);
-  rep(i, n){
-    x[i]=r[i];
-    rep(j, i){
-      double a=r[j]+r[i], b=r[j]-r[i];
-      chmax(x[i], x[j]+sqrt(a*a-b*b));
-    }
+  int n;
+  cin >> n;
+  vector<int> r(n);
+  for (auto &e : r) {
+    cin >> e;
   }
 
-  double mx=0;
-  rep(i, n) chmax(mx, x[i]+r[i]);
-  printf("%.20f\n", mx);
+  vector<double> cx;
+  rep(i, n) {
+    double min_x = r[i];
+    rep(j, cx.size()) {
+      double x = cx[j];
+      min_x = max(min_x, x + sqrt(SQ(r[i] + r[j]) - SQ(r[i] - r[j])));
+    }
+    cx.push_back(min_x);
+  }
+
+  double ans = 0.0;
+  rep(i, cx.size()) { ans = max(ans, cx[i] + r[i]); }
+  printf("%.18f\n", ans);
 
   return 0;
 }

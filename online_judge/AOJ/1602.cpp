@@ -1,60 +1,57 @@
-#include<iostream>
-#include<vector>
-#include<algorithm>
+#include <algorithm>
+#include <cassert>
+#include <ctype.h>
+#include <iostream>
+#include <vector>
+
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
 using namespace std;
 
-#define rep(i,n) for(int i=0;i<(n);i++)
-
-// o=0: add, o=1: mul
-int f(const vector<string> &str, int i=0, int d=0, int o=0){
-  vector<int> cand;
-  for(int j=i; j<str.size(); j++){
-    const string &s=str[j];
-    int k=0;
-    while(s[k]=='.') k++;
-    if(k==d) cand.push_back(j);
-    else if(k<d) break;
-  }
-  int ret=o;
-  for(int j: cand){
-    const char ch=str[j][d];
-    if(o==0){
-      if(ch=='+') ret+=f(str, j+1, d+1, 0);
-      else if(ch=='*') ret+=f(str, j+1, d+1, 1);
-      else ret+=(ch-'0');
-    }else{
-      if(ch=='+') ret*=f(str, j+1, d+1, 0);
-      else if(ch=='*') ret*=f(str, j+1, d+1, 1);
-      else ret*=(ch-'0');
+int rec(vector<string> &a, int i, int j) {
+  assert(a[i][j] == '+' or a[i][j] == '*');
+  vector<int> targets;
+  for (int y = i + 1; y < a.size(); y++) {
+    if (a[y].size() <= j) continue;
+    if (isdigit(a[y][j])) break;
+    if (a[y][j] == '+' or a[y][j] == '*') break;
+    if (j + 1 < a[y].size()) {
+      auto ch = a[y][j + 1];
+      if (isdigit(ch)) {
+        targets.push_back(ch - '0');
+      } else if (ch == '+' or ch == '*') {
+        targets.push_back(rec(a, y, j + 1));
+      }
     }
   }
-  return ret;
+  int res = a[i][j] == '+' ? 0 : 1;
+  for (auto t : targets) {
+    if (a[i][j] == '+') {
+      res += t;
+    } else {
+      res *= t;
+    }
+  }
+  return res;
 }
 
-int main(){
+int main() {
 
-  while(true){
-    int n; cin>> n;
-    if(n==0) break;
-    vector<string> str(n);
-    rep(i, n) cin>> str[i];
-    cout<< f(str)<< endl;
+  while (true) {
+    int n;
+    cin >> n;
+    if (n == 0) break;
+
+    if (n == 1) {
+      int d;
+      cin >> d;
+      cout << d << endl;
+      continue;
+    }
+    vector<string> a(n);
+    rep(i, n) cin >> a[i];
+    auto res = rec(a, 0, 0);
+    cout << res << endl;
   }
 
   return 0;
 }
-
-/*
-
-  *
-  .+
-  ..2
-  ..3
-  .4
-  .+
-  ..5
-  ..6
-
-  (2+3)*4+(5+6)
-
-*/

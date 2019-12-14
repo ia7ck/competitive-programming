@@ -6,12 +6,15 @@
 
 using namespace std;
 
-template <typename T> struct Edge {
+template <typename T>
+struct Edge {
   int to;
   T cost;
+  Edge(int to, T cost) : to(to), cost(cost) {}
 };
 
-template <typename T> vector<T> dijkstra(vector<vector<Edge<T>>> &g, int s) {
+template <typename T>
+vector<T> dijkstra(vector<vector<Edge<T>>> &g, int s) {
   const auto inf = numeric_limits<T>::max();
   vector<T> dist((int)g.size(), inf);
   dist[s] = 0;
@@ -37,11 +40,11 @@ int main() {
   const int n = 4, m = 5, s = 0;
   using edge = Edge<int>;
   vector<vector<edge>> g(n);
-  g[0].emplace_back(edge{1, 1});
-  g[0].emplace_back(edge{2, 4});
-  g[1].emplace_back(edge{2, 2});
-  g[2].emplace_back(edge{3, 1});
-  g[1].emplace_back(edge{3, 5});
+  g[0].emplace_back(1, 1);
+  g[0].emplace_back(2, 4);
+  g[1].emplace_back(2, 2);
+  g[2].emplace_back(3, 1);
+  g[1].emplace_back(3, 5);
   /*
     0-->1----+
     |   |    |

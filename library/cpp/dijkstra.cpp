@@ -15,7 +15,7 @@ struct Edge {
 
 template <typename T>
 vector<T> dijkstra(vector<vector<Edge<T>>> &g, int s) {
-  const auto inf = numeric_limits<T>::max();
+  const auto inf = numeric_limits<T>::max() / 3;
   vector<T> dist((int)g.size(), inf);
   dist[s] = 0;
   priority_queue<pair<T, int>> q;

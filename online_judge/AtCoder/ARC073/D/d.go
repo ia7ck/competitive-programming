@@ -23,19 +23,17 @@ func main() {
 		dp[k] = make([]int, sw+1)
 	}
 	for i := 0; i < n; i++ {
-		for k := n - 1; k >= 0; k-- {
-			for u := 0; u+(w[i]-w[0]) <= sw; u++ {
-				chmax(&dp[k+1][u+(w[i]-w[0])], dp[k][u]+v[i])
+		for c := n - 1; c >= 0; c-- {
+			for s := 0; s+(w[i]-w[0]) <= sw; s++ {
+				chmax(&dp[c+1][s+(w[i]-w[0])], dp[c][s]+v[i])
 			}
 		}
 	}
 	ans := 0
-	for k := 1; k <= n; k++ {
-		wmax := W - w[0]*k
-		if wmax >= 0 {
-			for u := 0; u <= wmax && u <= sw; u++ {
-				chmax(&ans, dp[k][u])
-			}
+	for c := 1; c <= n; c++ {
+		wmax := W - w[0]*c
+		for s := 0; s <= wmax && s <= sw; s++ {
+			chmax(&ans, dp[c][s])
 		}
 	}
 	fmt.Println(ans)

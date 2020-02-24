@@ -35,7 +35,7 @@ proc main() =
       if not ok:
         echo "No"
         return
-  if d.allIt(it >= 0):
+  if d.allIt(0 <= it and it <= 1_000_000_000):
     echo "Yes"
   else:
     echo "No"

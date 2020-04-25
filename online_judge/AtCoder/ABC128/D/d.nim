@@ -1,25 +1,27 @@
-import strutils, sequtils, algorithm, math
+import strutils, math, sequtils, algorithm
+
+let read = iterator: string {.closure.} =
+  while true:
+    for s in stdin.readLine.split:
+      yield s
 
 proc main() =
-  var n, k: int
-  (n, k) = stdin.readLine.strip.split.map(parseInt)
-  let v = stdin.readLine.strip.split.map(parseInt)
+  let
+    n, k = read().parseInt
+    a = newSeqWith(n, read().parseInt)
 
-  var ans = 0
-  for a in 0..min(n, k):
-    for b in 0..min(n, k):
-      if a + b > min(n, k): break
-      var jewels = newSeq[int]()
-      jewels.add(v[0..<a])
-      jewels.add(v[(^1 - b + 1)..^1])
-      jewels.sort(system.cmp)
-      let m = k - (a + b)
-      var s = jewels.sum
-      for i in 0..<min(jewels.len, m):
-        if jewels[i] >= 0:
-          break
-        s -= jewels[i]
-      ans = max(ans, s)
+  var ans = int.low
+  for i in 0..<n:
+    # [0, i)
+    for j in i..n:
+      # [j, n)
+      # -10, 8, 2, 1, 2, 6
+      if i + (n - j) <= k:
+        let
+          b = (a[0..<i] & a[j..^1]).sortedByIt(it)
+          s = b.sum
+        # echo i, " ", j, " ", b, " ", s
+        for p in 0..(k - i - (n - j)):
+          ans = max(ans, s - b[0..<min(b.len, p)].sum)
   echo ans
-
 main()

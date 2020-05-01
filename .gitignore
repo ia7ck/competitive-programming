@@ -3,12 +3,15 @@ test/
 rand/
 .vscode/
 nimcache/
+bin/
+obj/
 
 *.out
 *.o
 *.lst
 *.backup
 *.exe
+*.fsproj
 
 .fake
 .ionide

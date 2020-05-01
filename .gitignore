@@ -9,3 +9,6 @@ nimcache/
 *.lst
 *.backup
 *.exe
+
+.fake
+.ionide

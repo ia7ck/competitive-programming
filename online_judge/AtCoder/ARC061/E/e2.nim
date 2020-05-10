@@ -1,29 +1,29 @@
-type BinaryHeap[T] = object
+type HeapQueue[T] = object
   dat: seq[T]
   cmp: proc(x, y: T): bool
 
-proc `[]`[T](h: BinaryHeap[T], i: int): T = h.dat[i]
-proc `[]=`[T](h: var BinaryHeap[T], i: int, x: T) = h.dat[i] = x
-proc len[T](h: BinaryHeap[T]): int = h.dat.len
+proc `[]`[T](h: HeapQueue[T], i: int): T = h.dat[i]
+proc `[]=`[T](h: var HeapQueue[T], i: int, x: T) = h.dat[i] = x
+proc len[T](h: HeapQueue[T]): int = h.dat.len
 
-proc initBinaryHeap[T](a: seq[T], cmp: proc(x, y: T): bool): BinaryHeap[T] =
-  var dat = newSeq[T]()
-  return BinaryHeap[T](dat: dat, cmp: cmp)
+proc initHeapQueue[T](cmp: proc(x, y: T): bool): HeapQueue[T] =
+  return HeapQueue[T](dat: newSeq[T](), cmp: cmp)
 
-proc swap[T](h: var BinaryHeap[T], i, j: int) =
+proc swap[T](h: var HeapQueue[T], i, j: int) =
   swap(h.dat[i], h.dat[j])
 
-proc push[T](h: var BinaryHeap[T], x: T) =
+proc push[T](h: var HeapQueue[T], x: T) =
   h.dat.add(x)
   var i = h.len - 1
   while i > 0:
     var p = (i - 1) div 2
     if h.cmp(h[i], h[p]):
       h.swap(i, p)
+      i = p
     else:
       break
 
-proc pop[T](h: var BinaryHeap[T]): T =
+proc pop[T](h: var HeapQueue[T]): T =
   assert(h.len >= 1)
   h.swap(0, h.len - 1)
   let x = h.dat.pop
@@ -54,7 +54,7 @@ proc dijkstra(g: seq[seq[Edge]], s: int): seq[int64] =
     inf = int64.high div 2
   var
     d = newSeqWith(n, inf)
-    q = initBinaryHeap[P](@[], proc(x, y: P): bool = x.d < y.d)
+    q = initHeapQueue[P](proc(x, y: P): bool = x.d < y.d)
   d[s] = 0
   q.push((s, 0.int64))
   while q.len > 0:

@@ -15,3 +15,7 @@ obj/
 
 .fake
 .ionide
+
+.idea/
+out/
+*.iml

@@ -1,3 +1,15 @@
+use std::io::Read;
+
+fn read<T: std::str::FromStr>() -> T {
+    let token: String = std::io::stdin()
+        .bytes()
+        .map(|c| c.ok().unwrap() as char)
+        .skip_while(|c| c.is_whitespace())
+        .take_while(|c| !c.is_whitespace())
+        .collect();
+    token.parse().ok().unwrap()
+}
+
 fn gcd(a: i64, b: i64) -> i64 {
     if a % b == 0 {
         b
@@ -7,14 +19,8 @@ fn gcd(a: i64, b: i64) -> i64 {
 }
 
 fn main() {
-    let mut line = String::new();
-    std::io::stdin().read_line(&mut line).ok();
-    let ab: Vec<i64> = line
-        .trim()
-        .split_whitespace()
-        .map(|s| s.parse().unwrap())
-        .collect();
-    let (a, b) = (ab[0], ab[1]);
+    let a: i64 = read();
+    let b: i64 = read();
     let g = gcd(a, b);
     let sqrt = (g as f64).sqrt();
     if sqrt.ceil() == sqrt.floor() {

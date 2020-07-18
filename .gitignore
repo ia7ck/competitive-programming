@@ -5,6 +5,8 @@ rand/
 nimcache/
 bin/
 obj/
+target/
+Cargo.lock
 
 *.out
 *.o

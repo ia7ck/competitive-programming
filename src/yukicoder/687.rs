@@ -1,0 +1,21 @@
+use std::io::Read;
+
+fn read<T: std::str::FromStr>() -> T {
+    let token: String = std::io::stdin()
+        .bytes()
+        .map(|c| c.ok().unwrap() as char)
+        .skip_while(|c| c.is_whitespace())
+        .take_while(|c| !c.is_whitespace())
+        .collect();
+    token.parse().ok().unwrap()
+}
+
+fn main() {
+    let n: i32 = read();
+    for a in 1..=10 {
+        let b = n - a;
+        if 1 <= b && b <= 10 {
+            println!("{} {}", a, b);
+        }
+    }
+}

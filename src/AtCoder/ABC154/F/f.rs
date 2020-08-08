@@ -11,125 +11,206 @@ fn read<T: std::str::FromStr>() -> T {
 }
 
 mod mint {
-    use std::ops::{Add, Div, Mul, Sub};
+    use std::ops::{Add, AddAssign, BitAnd, Div, Mul, Rem, Shr, Sub};
 
-    type Int = i64;
-    pub const MOD: Int = 1_000_000_000 + 7;
-    #[derive(Clone, Copy)]
-    pub struct Mint {
-        x: Int,
+    #[derive(Copy, Clone)]
+    pub struct Mint<T> {
+        x: T,
+        mo: T,
     }
-    impl Mint {
-        pub fn new(x: Int) -> Mint {
-            Mint {
-                x: (x % MOD + MOD) % MOD,
-            }
+    impl<T> Mint<T>
+    where
+        T: Copy,
+    {
+        pub fn new(x: T, mo: T) -> Mint<T> {
+            Mint { x, mo }
         }
-        pub fn val(&self) -> Int {
+    }
+    impl<T> Mint<T>
+    where
+        T: Copy,
+    {
+        pub fn val(&self) -> T {
             self.x
         }
-    }
-    impl Add<Int> for Mint {
-        type Output = Mint;
-        fn add(self, rhs: Int) -> Mint {
-            Mint::new(self.val() + (rhs % MOD))
+        pub fn mo(&self) -> T {
+            self.mo
         }
     }
-    impl Add for Mint {
-        type Output = Mint;
-        fn add(self, rhs: Mint) -> Mint {
+    impl<T> Add<T> for Mint<T>
+    where
+        T: Copy,
+        T: Add<Output = T>,
+        T: Rem<Output = T>,
+    {
+        type Output = Mint<T>;
+        fn add(self, rhs: T) -> Mint<T> {
+            Mint::new((self.val() + rhs % self.mo()) % self.mo(), self.mo())
+        }
+    }
+    impl<T> Add<Mint<T>> for Mint<T>
+    where
+        T: Copy,
+        Mint<T>: Add<T, Output = Mint<T>>,
+    {
+        type Output = Mint<T>;
+        fn add(self, rhs: Mint<T>) -> Mint<T> {
             self + rhs.val()
         }
     }
-    impl Sub<Int> for Mint {
-        type Output = Mint;
-        fn sub(self, rhs: Int) -> Mint {
-            Mint::new(self.val() - (rhs % MOD))
+    impl<T> Sub<T> for Mint<T>
+    where
+        T: Copy,
+        T: Add<Output = T>,
+        T: Sub<Output = T>,
+        T: Rem<Output = T>,
+    {
+        type Output = Mint<T>;
+        fn sub(self, rhs: T) -> Mint<T> {
+            Mint::new(
+                (self.val() + self.mo() - rhs % self.mo()) % self.mo(),
+                self.mo(),
+            )
         }
     }
-    impl Sub for Mint {
-        type Output = Mint;
-        fn sub(self, rhs: Mint) -> Mint {
+    impl<T> Sub<Mint<T>> for Mint<T>
+    where
+        T: Copy,
+        Mint<T>: Sub<T, Output = Mint<T>>,
+    {
+        type Output = Mint<T>;
+        fn sub(self, rhs: Mint<T>) -> Mint<T> {
             self - rhs.val()
         }
     }
-    impl Mul<Int> for Mint {
-        type Output = Mint;
-        fn mul(self, rhs: Int) -> Mint {
-            Mint::new(self.val() * (rhs % MOD))
+    impl<T> Mul<T> for Mint<T>
+    where
+        T: Copy,
+        T: Mul<Output = T>,
+        T: Rem<Output = T>,
+    {
+        type Output = Mint<T>;
+        fn mul(self, rhs: T) -> Mint<T> {
+            Mint::new((self.val() * rhs % self.mo()) % self.mo(), self.mo())
         }
     }
-    impl Mul for Mint {
-        type Output = Mint;
-        fn mul(self, rhs: Mint) -> Mint {
+    impl<T> Mul<Mint<T>> for Mint<T>
+    where
+        T: Copy,
+        Mint<T>: Mul<T, Output = Mint<T>>,
+    {
+        type Output = Mint<T>;
+        fn mul(self, rhs: Mint<T>) -> Mint<T> {
             self * rhs.val()
         }
     }
-    impl Mint {
-        pub fn pow(x: Mint, y: Int) -> Mint {
-            assert!(y >= 0);
-            let mut res = Mint::new(1);
-            let mut base = x;
+
+    impl<T> Mint<T>
+    where
+        T: Copy,
+        T: Sub<Output = T>,
+        T: Div<Output = T>,
+        T: PartialOrd,
+        T: PartialEq,
+        T: BitAnd<Output = T>,
+        T: Shr<Output = T>,
+        Mint<T>: Mul<Output = Mint<T>>,
+    {
+        pub fn pow(self, y: T) -> Mint<T> {
+            let one = self.mo() / self.mo();
+            let zero = self.mo() - self.mo();
+            let mut res = Mint::one(self.mo());
+            let mut base = self;
             let mut exp = y;
-            while exp > 0 {
-                if (exp & 1) == 1 {
+            while exp > zero {
+                if (exp & one) == one {
                     res = res * base;
                 }
                 base = base * base;
-                exp = exp / 2;
+                exp = exp >> one;
             }
             res
         }
-        pub fn inv(self) -> Mint {
-            Mint::pow(self, MOD - 2)
+    }
+    impl<T> Div<T> for Mint<T>
+    where
+        T: Copy,
+        T: Sub<Output = T>,
+        T: Div<Output = T>,
+        T: PartialOrd,
+        T: PartialEq,
+        T: BitAnd<Output = T>,
+        T: Shr<Output = T>,
+        Mint<T>: Mul<Output = Mint<T>>,
+    {
+        type Output = Mint<T>;
+        fn div(self, rhs: T) -> Mint<T> {
+            let one = self.mo() / self.mo();
+            self * Mint::new(rhs, self.mo()).pow(self.mo() - one - one)
         }
     }
-    impl Div<Int> for Mint {
-        type Output = Mint;
-        fn div(self, rhs: Int) -> Mint {
-            self * Mint::new(rhs).inv()
+    impl<T> Div<Mint<T>> for Mint<T>
+    where
+        T: Copy,
+        Mint<T>: Div<T, Output = Mint<T>>,
+    {
+        type Output = Mint<T>;
+        fn div(self, rhs: Mint<T>) -> Mint<T> {
+            self / rhs.val()
         }
     }
-    impl Div for Mint {
-        type Output = Mint;
-        fn div(self, rhs: Mint) -> Mint {
-            self * rhs.val()
+    impl<T> Mint<T>
+    where
+        T: Copy,
+        T: Div<Output = T>,
+        Mint<T>: Div<Output = Mint<T>>,
+    {
+        pub fn inv(self) -> Mint<T> {
+            Mint::one(self.mo()) / self
         }
     }
-    impl std::fmt::Display for Mint {
+    impl<T> std::fmt::Display for Mint<T>
+    where
+        T: Copy + std::fmt::Display,
+    {
         fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
             write!(f, "{}", self.val())
+        }
+    }
+    impl<T> Mint<T>
+    where
+        T: Copy,
+        T: Sub<Output = T>,
+    {
+        pub fn zero(mo: T) -> Mint<T> {
+            Mint { x: mo - mo, mo }
+        }
+    }
+    impl<T> Mint<T>
+    where
+        T: Copy,
+        T: Div<Output = T>,
+    {
+        pub fn one(mo: T) -> Mint<T> {
+            Mint { x: mo / mo, mo }
         }
     }
 }
 
 use mint::Mint;
 
-struct Cmb {
-    fac: Vec<Mint>,
-    fac_inv: Vec<Mint>,
-}
-
-impl Cmb {
-    pub fn new(n: usize) -> Cmb {
-        let mut fac = vec![Mint::new(0); n];
-        let mut fac_inv = vec![Mint::new(0); n];
-        fac[0] = Mint::new(1);
-        for i in 1..n {
-            fac[i] = fac[i - 1] * (i as i64);
-        }
-        fac_inv[n - 1] = fac[n - 1].inv();
-        for i in (0..n - 1).rev() {
-            fac_inv[i] = fac_inv[i + 1] * ((i + 1) as i64)
-        }
-        Cmb { fac, fac_inv }
+fn factorials(n: usize, mo: usize) -> (Vec<Mint<usize>>, Vec<Mint<usize>>) {
+    let mut fac = vec![Mint::new(0, mo); n];
+    let mut fac_inv = vec![Mint::new(0, mo); n];
+    fac[0] = Mint::new(1, mo);
+    for i in 1..n {
+        fac[i] = fac[i - 1] * i;
     }
-    pub fn binom(&self, a: usize, b: usize) -> Mint {
-        if a < b {
-            return Mint::new(0);
-        }
-        self.fac[a] * self.fac_inv[b] * self.fac_inv[a - b]
+    fac_inv[n - 1] = fac[n - 1].inv();
+    for i in (0..n - 1).rev() {
+        fac_inv[i] = fac_inv[i + 1] * (i + 1);
     }
+    (fac, fac_inv)
 }
 
 fn main() {
@@ -138,15 +219,22 @@ fn main() {
     let r2: usize = read();
     let c2: usize = read();
 
-    fn solve(r: usize, c: usize) -> Mint {
-        let cmb = Cmb::new(r + c + 2);
-        let mut ans = Mint::new(0);
+    let mo = 1000000007;
+    let solve = |r: usize, c: usize| -> Mint<usize> {
+        let (fac, fac_inv) = factorials(r + c + 2, mo);
+        let binom = |a: usize, b: usize| {
+            if a < b {
+                return Mint::new(0, mo);
+            }
+            fac[a] * fac_inv[b] * fac_inv[a - b]
+        };
+        let mut ans = Mint::new(0, mo);
         for i in 0..=r {
-            ans = ans + cmb.binom((i + 1) + c, c);
+            ans = ans + binom((i + 1) + c, c);
         }
         ans
-    }
-    let mut ans = Mint::new(0);
+    };
+    let mut ans = Mint::new(0, mo);
     ans = ans + solve(r2, c2);
     ans = ans - solve(r1 - 1, c2);
     ans = ans - solve(r2, c1 - 1);

@@ -17,9 +17,5 @@ fn main() {
         println!("{}", if n % (a + 1) != 0 { tak } else { aok });
         return;
     }
-    if b >= n - 1 {
-        println!("{}", aok);
-        return;
-    }
     println!("{}", if a > b { tak } else { aok });
 }

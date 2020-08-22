@@ -1,12 +1,13 @@
 test/
 *.fsproj
+*.pdb
 
 # Created by https://www.toptal.com/developers/gitignore/api/d,nim,c++,ruby,rust,fsharp,python,intellij+all
 # Edit at https://www.toptal.com/developers/gitignore?templates=d,nim,c++,ruby,rust,fsharp,python,intellij+all
 
 ### C++ ###
 # Prerequisites
-*.d
+# *.d
 
 # Compiled Object files
 *.slo

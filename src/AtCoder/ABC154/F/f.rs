@@ -10,8 +10,9 @@ fn read<T: std::str::FromStr>() -> T {
     token.parse().ok().unwrap()
 }
 
+#[allow(dead_code)]
 mod mint {
-    use std::ops::{Add, AddAssign, BitAnd, Div, Mul, Rem, Shr, Sub};
+    use std::ops::{Add, BitAnd, Div, Mul, Rem, Shr, Sub};
 
     #[derive(Copy, Clone)]
     pub struct Mint<T> {
@@ -221,7 +222,19 @@ fn main() {
 
     let mo = 1000000007;
     let solve = |r: usize, c: usize| -> Mint<usize> {
-        let (fac, fac_inv) = factorials(r + c + 2, mo);
+        let (fac, fac_inv) = (|n, mo| {
+            let mut fac = vec![Mint::new(0, mo); n];
+            let mut fac_inv = vec![Mint::new(0, mo); n];
+            fac[0] = Mint::new(1, mo);
+            for i in 1..n {
+                fac[i] = fac[i - 1] * i;
+            }
+            fac_inv[n - 1] = fac[n - 1].inv();
+            for i in (0..n - 1).rev() {
+                fac_inv[i] = fac_inv[i + 1] * (i + 1);
+            }
+            (fac, fac_inv)
+        })(r + c + 2, mo);
         let binom = |a: usize, b: usize| {
             if a < b {
                 return Mint::new(0, mo);
@@ -234,6 +247,7 @@ fn main() {
         }
         ans
     };
+
     let mut ans = Mint::new(0, mo);
     ans = ans + solve(r2, c2);
     ans = ans - solve(r1 - 1, c2);

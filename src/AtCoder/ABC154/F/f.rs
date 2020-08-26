@@ -200,20 +200,6 @@ mod mint {
 
 use mint::Mint;
 
-fn factorials(n: usize, mo: usize) -> (Vec<Mint<usize>>, Vec<Mint<usize>>) {
-    let mut fac = vec![Mint::new(0, mo); n];
-    let mut fac_inv = vec![Mint::new(0, mo); n];
-    fac[0] = Mint::new(1, mo);
-    for i in 1..n {
-        fac[i] = fac[i - 1] * i;
-    }
-    fac_inv[n - 1] = fac[n - 1].inv();
-    for i in (0..n - 1).rev() {
-        fac_inv[i] = fac_inv[i + 1] * (i + 1);
-    }
-    (fac, fac_inv)
-}
-
 fn main() {
     let r1: usize = read();
     let c1: usize = read();

@@ -320,23 +320,14 @@ fn main() {
     let h = minimum_spanning_tree(&g).unwrap();
     let mut size = vec![0; n];
     dfs(&h, 0, !0, &mut size);
-    let mut q = std::collections::VecDeque::new();
-    q.push_back((0, !0, 0, 0));
     let mo = 1_000_000_000 + 7;
     let mut ans = Mint::zero(mo);
-    while let Some((i, p, c, acc)) = q.pop_front() {
-        if p != !0 {
-            ans = ans + Mint::new(size[i] * acc, mo) * Mint::new(x, mo).pow(c);
-        }
-        let mut a = acc + 1;
+    for i in 0..n {
         for e in &h[i] {
-            if e.to != p {
-                a += size[e.to];
-            }
-        }
-        for e in &h[i] {
-            if e.to != p {
-                q.push_back((e.to, i, e.cost as usize, a - size[e.to]));
+            if size[e.to] < size[i] {
+                ans = ans
+                    + Mint::new(size[e.to] * (n - size[e.to]), mo)
+                        * Mint::new(x, mo).pow(e.cost as usize);
             }
         }
     }

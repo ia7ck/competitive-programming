@@ -214,129 +214,26 @@ mod mint {
 
 use mint::Mint;
 
-pub struct UnionFind {
-    par: Vec<usize>,
-    size: Vec<usize>,
-}
-
-impl UnionFind {
-    pub fn new(n: usize) -> UnionFind {
-        UnionFind {
-            par: (0..n).map(|i| i).collect::<Vec<_>>(),
-            size: vec![1; n],
-        }
-    }
-    pub fn find(&mut self, i: usize) -> usize {
-        if self.par[i] == i {
-            self.par[i]
-        } else {
-            self.par[i] = self.find(self.par[i]);
-            self.par[i]
-        }
-    }
-    pub fn unite(&mut self, i: usize, j: usize) {
-        let i = self.find(i);
-        let j = self.find(j);
-        if i == j {
-            return;
-        }
-        let (i, j) = if self.size[i] >= self.size[j] {
-            (i, j)
-        } else {
-            (j, i)
-        };
-        self.par[j] = i;
-        self.size[i] += self.size[j];
-    }
-    pub fn same(&mut self, i: usize, j: usize) -> bool {
-        self.find(i) == self.find(j)
-    }
-    pub fn get_size(&mut self, i: usize) -> usize {
-        let p = self.find(i);
-        self.size[p]
-    }
-}
-
-#[derive(Debug, Clone)]
-struct Edge {
-    from: usize,
-    to: usize,
-    cost: i64,
-}
-
-fn minimum_spanning_tree(n: usize, edges: &Vec<Edge>) -> Option<Vec<Edge>> {
-    let mut es = edges.clone();
-    es.sort_by(|a, b| a.cost.cmp(&b.cost));
-    let mut uf = UnionFind::new(n);
-    let result = es
-        .into_iter()
-        .filter(|e| {
-            if !uf.same(e.from, e.to) {
-                uf.unite(e.from, e.to);
-                true
-            } else {
-                false
-            }
-        })
-        .collect::<Vec<_>>();
-    if result.len() == n - 1 {
-        Some(result)
-    } else {
-        assert!(result.len() < n - 1);
-        None
-    }
-}
-
-fn dfs(g: &Vec<Vec<Edge>>, i: usize, p: usize, size: &mut Vec<usize>) {
-    size[i] = 1;
-    for e in &g[i] {
-        if e.to != p {
-            dfs(g, e.to, i, size);
-            size[i] += size[e.to];
-        }
-    }
-}
-
 fn main() {
     let stdin = std::io::stdin();
     let mut rd = ProconReader::new(stdin.lock());
 
     let n: usize = rd.get();
     let m: usize = rd.get();
-    let x: usize = rd.get();
-    let mut edges = vec![];
-    for _ in 0..m {
-        let u: usize = rd.get();
-        let v: usize = rd.get();
-        let w: i64 = rd.get();
-        edges.push(Edge {
-            from: u - 1,
-            to: v - 1,
-            cost: w,
-        });
+    let x: u64 = rd.get();
+    let a: Vec<u64> = (0..n).map(|_| rd.get()).collect();
+    let b: Vec<u64> = (0..m).map(|_| rd.get()).collect();
+
+    let xa = a.iter().fold(0, |acc, x| acc ^ x);
+    let xb = b.iter().fold(0, |acc, x| acc ^ x);
+    if xa != xb {
+        println!("0");
+        return;
     }
-    let tree_edges = minimum_spanning_tree(n, &edges).unwrap();
-    let mut g = vec![vec![]; n];
-    for e in &tree_edges {
-        g[e.from].push(e.clone());
-        g[e.to].push(Edge {
-            from: e.to,
-            to: e.from,
-            ..*e
-        });
-    }
-    let mut size = vec![0; n];
-    dfs(&g, 0, !0, &mut size);
+
     let mo = 1_000_000_000 + 7;
-    let mut ans = Mint::zero(mo);
-    for i in 0..n {
-        for e in &g[i] {
-            if size[e.to] < size[i] {
-                ans = ans
-                    + Mint::new(size[e.to] * (n - size[e.to]), mo)
-                        * Mint::new(x, mo).pow(e.cost as usize);
-            }
-        }
-    }
-    println!("{}", ans);
+    println!(
+        "{}",
+        Mint::new(2, mo).pow(x).pow(((n - 1) * (m - 1)) as u64)
+    );
 }

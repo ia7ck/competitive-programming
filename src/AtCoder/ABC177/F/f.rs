@@ -24,29 +24,36 @@ impl<R: std::io::Read> ProconReader<R> {
     }
 }
 
-struct LazySegmentTree<T, F, U, G, H> {
+struct LazySegmentTree<T, Multiply, F, Composite, Apply> {
     n: usize,
     dat: Vec<T>,
-    e_t: T,
-    multiply: F,
-    laz: Vec<U>,
-    e_u: U,
-    composite: G,
-    apply: H,
+    e: T,
+    multiply: Multiply,
+    laz: Vec<F>,
+    id: F,
+    composite: Composite,
+    apply: Apply,
 }
 
-impl<T, F, U, G, H> LazySegmentTree<T, F, U, G, H>
+impl<T, Multiply, F, Composite, Apply> LazySegmentTree<T, Multiply, F, Composite, Apply>
 where
     T: Copy + std::fmt::Debug,
-    F: Fn(T, T) -> T,
-    U: Copy + std::fmt::Debug,
-    G: Fn(U, U) -> U,
-    H: Fn(U, T) -> T,
+    Multiply: Fn(T, T) -> T,
+    F: Copy + std::fmt::Debug,
+    Composite: Fn(F, F) -> F,
+    Apply: Fn(F, T) -> T,
 {
-    fn new(a: &Vec<T>, e_t: T, multiply: F, e_u: U, composite: G, apply: H) -> Self {
+    fn new(
+        a: &Vec<T>,
+        e: T,
+        multiply: Multiply,
+        id: F,
+        composite: Composite,
+        apply: Apply,
+    ) -> Self {
         let len = a.len();
         let n = len.next_power_of_two();
-        let mut dat = vec![e_t; n * 2 - 1];
+        let mut dat = vec![e; n * 2 - 1];
         for i in 0..len {
             dat[i + n - 1] = a[i];
         }
@@ -56,44 +63,46 @@ where
         Self {
             n,
             dat,
-            e_t,
+            e,
             multiply,
-            laz: vec![e_u; n * 2 - 1],
-            e_u,
+            laz: vec![id; n * 2 - 1],
+            id,
             composite,
             apply,
         }
     }
-    fn update_node(&mut self, i: usize, u: U) {
-        self.dat[i] = (self.apply)(u, self.dat[i]);
-        self.laz[i] = (self.composite)(u, self.laz[i]);
+    fn update_node(&mut self, i: usize, f: F) {
+        self.dat[i] = (self.apply)(f, self.dat[i]);
+        if i < self.n {
+            self.laz[i] = (self.composite)(f, self.laz[i]);
+        }
     }
     fn update_range(
         &mut self,
         range: &std::ops::Range<usize>,
         i: usize,
         i_range: std::ops::Range<usize>,
-        u: U,
+        f: F,
     ) {
         if range.end <= i_range.start || i_range.end <= range.start {
             return;
         }
         if range.start <= i_range.start && i_range.end <= range.end {
-            self.update_node(i, u);
+            self.update_node(i, f);
             return;
         }
         let left_child = i * 2 + 1;
         let right_child = i * 2 + 2;
         self.update_node(left_child, self.laz[i]);
         self.update_node(right_child, self.laz[i]);
-        self.laz[i] = self.e_u;
+        self.laz[i] = self.id;
         let m = (i_range.start + i_range.end) / 2;
-        self.update_range(range, left_child, i_range.start..m, u);
-        self.update_range(range, right_child, m..i_range.end, u);
+        self.update_range(range, left_child, i_range.start..m, f);
+        self.update_range(range, right_child, m..i_range.end, f);
         self.dat[i] = (self.multiply)(self.dat[left_child], self.dat[right_child]);
     }
-    fn update(&mut self, range: std::ops::Range<usize>, u: U) {
-        self.update_range(&range, 0, 0..self.n, u);
+    fn update(&mut self, range: std::ops::Range<usize>, f: F) {
+        self.update_range(&range, 0, 0..self.n, f);
     }
     fn _fold(
         &self,
@@ -102,7 +111,7 @@ where
         i_range: std::ops::Range<usize>,
     ) -> T {
         if range.end <= i_range.start || i_range.end <= range.start {
-            return self.e_t;
+            return self.e;
         }
         if range.start <= i_range.start && i_range.end <= range.end {
             return self.dat[i];
@@ -156,57 +165,53 @@ fn main() {
             (a - 1, b - 1)
         })
         .collect();
-    let e_u = std::usize::MAX;
-    let mut seg = LazySegmentTree::new(
-        &(0..w).zip(0..w).collect(),
-        (0, !0),
-        |a, b| {
-            if a.1 - a.0 < b.1 - b.0 {
-                a
+    let inf = w + 1;
+    let id = std::usize::MAX;
+    let composite = |f, g| if f == id { g } else { f };
+    let apply = |f, (a, i)| {
+        if f == id {
+            (a, i)
+        } else {
+            (f, i)
+        }
+    };
+    let mut seg1 = LazySegmentTree::new(
+        &(vec![0; w].into_iter().zip(0..w).collect::<Vec<_>>()),
+        (inf, 0),
+        |(a, i), (b, j)| {
+            // a - i < b - j
+            if a + j < b + i {
+                (a, i)
             } else {
-                b
+                (b, j)
             }
         },
-        e_u,
-        |u, v| if u == e_u { v } else { u },
-        |u, a| {
-            if u == e_u {
-                a
-            } else {
-                (a.0, u)
-            }
-        },
+        id,
+        composite,
+        apply,
+    );
+    let mut seg2 = LazySegmentTree::new(
+        &(vec![0; w].into_iter().zip(0..w).collect::<Vec<_>>()),
+        (inf, 0),
+        |(a, i), (b, j)| std::cmp::min((a, i), (b, j)),
+        id,
+        composite,
+        apply,
     );
     for (i, &(a, b)) in ab.iter().enumerate() {
-        let lower_bound = |x| {
-            if seg.get(0).1 >= x {
-                return 0;
-            }
-            let mut ok = w;
-            let mut ng = 0;
-            while ok - ng > 1 {
-                let m = (ok + ng) / 2;
-                if seg.get(m).1 >= x {
-                    ok = m;
-                } else {
-                    ng = m;
-                }
-            }
-            ok
-        };
-        let l = lower_bound(a);
-        let r = lower_bound(b + 1);
-        if l < r {
-            seg.update(l..r, if b + 1 < w { b + 1 } else { w * 10 });
+        let (x, j) = seg1.fold(a..(b + 1));
+        if x < inf && b + 1 < w {
+            let (y, _) = seg1.get(b + 1);
+            seg1.update((b + 1)..(b + 2), std::cmp::min(y, x + b + 1 - j));
+            seg2.update((b + 1)..(b + 2), std::cmp::min(y, x + b + 1 - j));
         }
-        // println!("{:?}", (0..w).map(|i| seg.get(i)).collect::<Vec<_>>());
-        // seg.debug_tree();
-        let (begin, end) = seg.fold(0..w);
-        let ans = end - begin;
-        if ans < w {
-            println!("{}", (i + 1) + ans);
-        } else {
+        seg1.update(a..(b + 1), inf);
+        seg2.update(a..(b + 1), inf);
+        let (ans, _) = seg2.fold(0..w);
+        if ans == inf {
             println!("{}", -1);
+        } else {
+            println!("{}", ans + i + 1);
         }
     }
 }

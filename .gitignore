@@ -1,5 +1,4 @@
 test/
-*.fsproj
 *.pdb
 
 # Created by https://www.toptal.com/developers/gitignore/api/d,nim,c++,ruby,rust,fsharp,python,intellij+all

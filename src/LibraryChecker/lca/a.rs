@@ -1,118 +1,158 @@
-struct Tree {
-    par: Vec<Vec<Option<usize>>>,
-    dep: Vec<usize>,
-}
-
-impl Tree {
-    pub fn new(n: usize, edges: &[(usize, usize)]) -> Self {
-        let mut g = vec![vec![]; n];
-        for &(u, v) in edges {
-            g[u].push(v);
-            g[v].push(u);
-        }
-        let mut par = vec![None; n];
-        let mut dep = vec![0; n];
-        Self::dfs(0, None, &g, &mut par, &mut dep);
-        let k = ((n as f64).log2()) as usize + 1;
-        let mut par = vec![par];
-        for i in 0..k {
-            par.push(vec![None; n]);
-            for j in 0..n {
-                if let Some(p) = par[i][j] {
-                    par[i + 1][j] = par[i][p];
-                }
-            }
-        }
-        Self { par, dep }
-    }
-
-    fn dfs(
-        i: usize,
-        p: Option<usize>,
-        g: &Vec<Vec<usize>>,
-        par: &mut Vec<Option<usize>>,
-        dep: &mut Vec<usize>,
-    ) {
-        for &j in &g[i] {
-            if p.map_or(true, |p| j != p) {
-                par[j] = Some(i);
-                dep[j] = dep[i] + 1;
-                Self::dfs(j, Some(i), g, par, dep);
-            }
-        }
-    }
-
-    pub fn get_lca(&self, u: usize, v: usize) -> usize {
-        let (mut u, mut v) = (u, v);
-        if self.dep[u] < self.dep[v] {
-            std::mem::swap(&mut u, &mut v);
-        }
-        let k = self.par.len();
-        for i in 0..k {
-            if ((self.dep[u] - self.dep[v]) >> i & 1) == 1 {
-                u = self.par[i][u].unwrap();
-            }
-        }
-        if u == v {
-            return u;
-        }
-        for i in (0..k).rev() {
-            if self.par[i][u] != self.par[i][v] {
-                u = self.par[i][u].unwrap();
-                v = self.par[i][v].unwrap();
-            }
-        }
-        self.par[0][u].unwrap()
-    }
-
-    pub fn dist(&self, u: usize, v: usize) -> usize {
-        let w = self.get_lca(u, v);
-        self.dep[u] + self.dep[v] - self.dep[w] * 2
-    }
-}
-
 fn main() {
     let stdin = std::io::stdin();
     let mut rd = ProconReader::new(stdin.lock());
 
     let n: usize = rd.get();
     let q: usize = rd.get();
-    let edges: Vec<(usize, usize)> = (1..n)
+    let edges: Vec<(usize, usize)> = (1..=(n - 1))
         .map(|i| {
             let p: usize = rd.get();
-            (i, p)
+            (p, i)
         })
         .collect();
-    let tree = Tree::new(n, &edges);
+    let lca = LowestCommonAncestor::from_edges(n, &edges);
     for _ in 0..q {
         let u: usize = rd.get();
         let v: usize = rd.get();
-        println!("{}", tree.get_lca(u, v));
+        println!("{}", lca.get(u, v));
     }
 }
 
-pub struct ProconReader<R: std::io::Read> {
-    reader: R,
+pub struct LowestCommonAncestor {
+    par: Vec<Vec<Option<usize>>>,
+    dep: Vec<usize>,
+    lg_n: usize,
 }
 
-impl<R: std::io::Read> ProconReader<R> {
+impl LowestCommonAncestor {
+    pub fn from_edges(n: usize, edges: &[(usize, usize)]) -> Self {
+        let mut g = vec![vec![]; n];
+        for &(u, v) in edges {
+            g[u].push(v);
+            g[v].push(u);
+        }
+        Self::from_adj_list(&g)
+    }
+    pub fn from_adj_list(g: &[Vec<usize>]) -> Self {
+        fn dfs(
+            i: usize,
+            p: Option<usize>,
+            g: &[Vec<usize>],
+            par: &mut [Vec<Option<usize>>],
+            dep: &mut [usize],
+        ) {
+            par[i][0] = p;
+            for &j in &g[i] {
+                match p {
+                    Some(p) if p == j => {}
+                    _ => {
+                        dep[j] = dep[i] + 1;
+                        dfs(j, Some(i), g, par, dep);
+                    }
+                }
+            }
+        }
+        let log2 = |k| {
+            let mut exp: usize = 1;
+            let mut m = 1;
+            loop {
+                if m >= k {
+                    break exp;
+                }
+                exp += 1;
+                m *= 2;
+            }
+        };
+        let n = g.len();
+        let lg_n = log2(n);
+        let mut par = vec![vec![None; lg_n]; n];
+        let mut dep = vec![0; n];
+        dfs(0, None, &g, &mut par, &mut dep);
+        for v in 0..n {
+            for j in 1..lg_n {
+                if let Some(p) = par[v][j - 1] {
+                    par[v][j] = par[p][j - 1];
+                }
+            }
+        }
+        Self { par, dep, lg_n }
+    }
+    pub fn get(&self, u: usize, v: usize) -> usize {
+        let (mut u, mut v) = if self.dep[u] >= self.dep[v] {
+            (u, v)
+        } else {
+            (v, u)
+        };
+        for i in 0..self.lg_n {
+            if (self.dep[u] - self.dep[v]) >> i & 1 == 1 {
+                u = self.par[u][i].unwrap();
+            }
+        }
+        if u == v {
+            return u;
+        }
+        for i in (0..self.lg_n).rev() {
+            if self.par[u][i] != self.par[v][i] {
+                u = self.par[u][i].unwrap();
+                v = self.par[v][i].unwrap();
+            }
+        }
+        self.par[u][0].unwrap()
+    }
+}
+
+pub struct ProconReader<R> {
+    r: R,
+    line: String,
+    i: usize,
+}
+
+impl<R: std::io::BufRead> ProconReader<R> {
     pub fn new(reader: R) -> Self {
-        Self { reader }
+        Self {
+            r: reader,
+            line: String::new(),
+            i: 0,
+        }
     }
-    pub fn get<T: std::str::FromStr>(&mut self) -> T {
-        use std::io::Read;
-        let buf = self
-            .reader
-            .by_ref()
-            .bytes()
-            .map(|b| b.unwrap())
-            .skip_while(|&byte| byte == b' ' || byte == b'\n' || byte == b'\r')
-            .take_while(|&byte| byte != b' ' && byte != b'\n' && byte != b'\r')
-            .collect::<Vec<_>>();
-        std::str::from_utf8(&buf)
-            .unwrap()
-            .parse()
-            .ok()
-            .expect("Parse Error.")
+    pub fn get<T>(&mut self) -> T
+    where
+        T: std::str::FromStr,
+        <T as std::str::FromStr>::Err: std::fmt::Debug,
+    {
+        self.skip_blanks();
+        assert!(self.i < self.line.len());
+        assert_ne!(&self.line[self.i..=self.i], " ");
+        let line = &self.line[self.i..];
+        let end = line.find(' ').unwrap_or(line.len());
+        let s = &line[..end];
+        self.i += end;
+        s.parse()
+            .unwrap_or_else(|_| panic!("parse error `{}`", self.line))
+    }
+    fn skip_blanks(&mut self) {
+        loop {
+            let start = self.line[self.i..].find(|ch| ch != ' ');
+            match start {
+                Some(j) => {
+                    self.i += j;
+                    break;
+                }
+                None => {
+                    self.line.clear();
+                    self.i = 0;
+                    let num_bytes = self.r.read_line(&mut self.line).unwrap();
+                    assert!(num_bytes > 0, "reached EOF :(");
+                    self.line = self.line.trim_end_matches(&['\r', '\n'][..]).to_string();
+                }
+            }
+        }
+    }
+    pub fn get_vec<T>(&mut self, n: usize) -> Vec<T>
+    where
+        T: std::str::FromStr,
+        <T as std::str::FromStr>::Err: std::fmt::Debug,
+    {
+        (0..n).map(|_| self.get()).collect()
     }
 }

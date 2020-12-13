@@ -95,7 +95,7 @@ macro_rules! define_mod_int_p {
         pub type $mod_int = ModInt<$mod>;
     };
 }
-define_mod_int_p!(Mod1000000007, ModInt1000000007, 100000007);
+define_mod_int_p!(Mod1000000007, ModInt1000000007, 1000000007);
 define_mod_int_p!(Mod998244353, ModInt998244353, 998244353);
 
 pub struct ProconReader<R> {

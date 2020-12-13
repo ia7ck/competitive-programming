@@ -2,228 +2,154 @@ fn main() {
     let stdin = std::io::stdin();
     let mut rd = ProconReader::new(stdin.lock());
 
-    use mint::Mint;
     let n: usize = rd.get();
     let k: usize = rd.get();
-    let a: Vec<usize> = (0..n).map(|_| rd.get()).collect();
+    let a: Vec<i64> = (0..n).map(|_| rd.get()).collect();
 
-    let mo: usize = 998244353;
-    let sum = a
-        .iter()
-        .fold(Mint::zero(mo), |acc, &x| acc + Mint::new(x, mo));
-    println!("{}", sum * Mint::new(2, mo).pow(k));
+    type Mint = ModInt998244353;
+    let sum = a.iter().fold(Mint::new(0), |acc, &x| acc + Mint::new(x));
+    let ans = sum * Mint::new(2).pow(k as u64);
+    println!("{}", ans.val());
 }
 
-#[allow(dead_code)]
-mod mint {
-    use std::ops::{Add, BitAnd, Div, Mul, Rem, Shr, Sub};
+use std::fmt::Debug;
+use std::marker::PhantomData;
+use std::ops::{Add, Div, Mul, Sub};
 
-    #[derive(Copy, Clone, Debug)]
-    pub struct Mint<T> {
-        x: T,
-        mo: T,
-    }
-    impl<T> Mint<T>
-    where
-        T: Copy,
-    {
-        pub fn new(x: T, mo: T) -> Mint<T> {
-            Mint { x, mo }
-        }
-    }
-    impl<T> Mint<T>
-    where
-        T: Copy,
-    {
-        pub fn val(&self) -> T {
-            self.x
-        }
-        pub fn mo(&self) -> T {
-            self.mo
-        }
-    }
-    impl<T> Add<T> for Mint<T>
-    where
-        T: Copy,
-        T: Add<Output = T>,
-        T: Rem<Output = T>,
-    {
-        type Output = Mint<T>;
-        fn add(self, rhs: T) -> Mint<T> {
-            Mint::new((self.val() + rhs % self.mo()) % self.mo(), self.mo())
-        }
-    }
-    impl<T> Add<Mint<T>> for Mint<T>
-    where
-        T: Copy,
-        Mint<T>: Add<T, Output = Mint<T>>,
-    {
-        type Output = Mint<T>;
-        fn add(self, rhs: Mint<T>) -> Mint<T> {
-            self + rhs.val()
-        }
-    }
-    impl<T> Sub<T> for Mint<T>
-    where
-        T: Copy,
-        T: Add<Output = T>,
-        T: Sub<Output = T>,
-        T: Rem<Output = T>,
-    {
-        type Output = Mint<T>;
-        fn sub(self, rhs: T) -> Mint<T> {
-            Mint::new(
-                (self.val() + self.mo() - rhs % self.mo()) % self.mo(),
-                self.mo(),
-            )
-        }
-    }
-    impl<T> Sub<Mint<T>> for Mint<T>
-    where
-        T: Copy,
-        Mint<T>: Sub<T, Output = Mint<T>>,
-    {
-        type Output = Mint<T>;
-        fn sub(self, rhs: Mint<T>) -> Mint<T> {
-            self - rhs.val()
-        }
-    }
-    impl<T> Mul<T> for Mint<T>
-    where
-        T: Copy,
-        T: Mul<Output = T>,
-        T: Rem<Output = T>,
-    {
-        type Output = Mint<T>;
-        fn mul(self, rhs: T) -> Mint<T> {
-            Mint::new((self.val() * rhs % self.mo()) % self.mo(), self.mo())
-        }
-    }
-    impl<T> Mul<Mint<T>> for Mint<T>
-    where
-        T: Copy,
-        Mint<T>: Mul<T, Output = Mint<T>>,
-    {
-        type Output = Mint<T>;
-        fn mul(self, rhs: Mint<T>) -> Mint<T> {
-            self * rhs.val()
-        }
-    }
+pub trait Modulo: Copy + Clone + Debug {
+    fn p() -> i64;
+}
 
-    impl<T> Mint<T>
-    where
-        T: Copy,
-        T: Sub<Output = T>,
-        T: Div<Output = T>,
-        T: PartialOrd,
-        T: PartialEq,
-        T: BitAnd<Output = T>,
-        T: Shr<Output = T>,
-        Mint<T>: Mul<Output = Mint<T>>,
-    {
-        pub fn pow(self, y: T) -> Mint<T> {
-            let one = self.mo() / self.mo();
-            let zero = self.mo() - self.mo();
-            let mut res = Mint::one(self.mo());
-            let mut base = self;
-            let mut exp = y;
-            while exp > zero {
-                if (exp & one) == one {
-                    res = res * base;
-                }
-                base = base * base;
-                exp = exp >> one;
+#[derive(Copy, Clone, Debug)]
+pub struct ModInt<M>(i64, PhantomData<M>);
+
+impl<M: Modulo> ModInt<M> {
+    pub fn new(x: i64) -> Self {
+        Self(x.rem_euclid(M::p()), PhantomData)
+    }
+    pub fn val(self) -> i64 {
+        self.0
+    }
+    pub fn mo(self) -> i64 {
+        M::p()
+    }
+    pub fn pow(self, exp: u64) -> Self {
+        let mut res = Self::new(1);
+        let mut base = self;
+        let mut exp = exp;
+        while exp > 0 {
+            if exp & 1 == 1 {
+                res = res * base;
             }
-            res
+            base = base * base;
+            exp >>= 1;
         }
+        res
     }
-    impl<T> Div<T> for Mint<T>
-    where
-        T: Copy,
-        T: Sub<Output = T>,
-        T: Div<Output = T>,
-        T: PartialOrd,
-        T: PartialEq,
-        T: BitAnd<Output = T>,
-        T: Shr<Output = T>,
-        Mint<T>: Mul<Output = Mint<T>>,
-    {
-        type Output = Mint<T>;
-        fn div(self, rhs: T) -> Mint<T> {
-            let one = self.mo() / self.mo();
-            self * Mint::new(rhs, self.mo()).pow(self.mo() - one - one)
-        }
+    pub fn inv(self) -> Self {
+        assert_ne!(self.0, 0, "Don't divide by zero!");
+        self.pow(M::p() as u64 - 2)
     }
-    impl<T> Div<Mint<T>> for Mint<T>
-    where
-        T: Copy,
-        Mint<T>: Div<T, Output = Mint<T>>,
-    {
-        type Output = Mint<T>;
-        fn div(self, rhs: Mint<T>) -> Mint<T> {
-            self / rhs.val()
-        }
-    }
-    impl<T> Mint<T>
-    where
-        T: Copy,
-        T: Div<Output = T>,
-        Mint<T>: Div<Output = Mint<T>>,
-    {
-        pub fn inv(self) -> Mint<T> {
-            Mint::one(self.mo()) / self
-        }
-    }
-    impl<T> std::fmt::Display for Mint<T>
-    where
-        T: Copy + std::fmt::Display,
-    {
-        fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-            write!(f, "{}", self.val())
-        }
-    }
-    impl<T> Mint<T>
-    where
-        T: Copy,
-        T: Sub<Output = T>,
-    {
-        pub fn zero(mo: T) -> Mint<T> {
-            Mint { x: mo - mo, mo }
-        }
-    }
-    impl<T> Mint<T>
-    where
-        T: Copy,
-        T: Div<Output = T>,
-    {
-        pub fn one(mo: T) -> Mint<T> {
-            Mint { x: mo / mo, mo }
-        }
+    pub fn new_frac(numer: i64, denom: i64) -> Self {
+        Self::new(numer) / Self::new(denom)
     }
 }
 
-pub struct ProconReader<R: std::io::Read> {
-    reader: R,
+impl<M: Modulo> Add for ModInt<M> {
+    type Output = ModInt<M>;
+    fn add(self, rhs: ModInt<M>) -> Self::Output {
+        Self((self.0 + rhs.0) % M::p(), PhantomData)
+    }
 }
 
-impl<R: std::io::Read> ProconReader<R> {
+impl<M: Modulo> Sub for ModInt<M> {
+    type Output = ModInt<M>;
+    fn sub(self, rhs: ModInt<M>) -> Self::Output {
+        Self((self.0 - rhs.0).rem_euclid(M::p()), PhantomData)
+    }
+}
+
+impl<M: Modulo> Mul for ModInt<M> {
+    type Output = ModInt<M>;
+    fn mul(self, rhs: ModInt<M>) -> Self::Output {
+        Self((self.0 * rhs.0) % M::p(), PhantomData)
+    }
+}
+
+impl<M: Modulo> Div for ModInt<M> {
+    type Output = ModInt<M>;
+    fn div(self, rhs: ModInt<M>) -> Self::Output {
+        self * rhs.inv()
+    }
+}
+
+macro_rules! define_mod_int_p {
+    ($mod: ident, $mod_int: ident, $p: expr) => {
+        #[derive(Clone, Copy, Debug)]
+        pub struct $mod;
+        impl Modulo for $mod {
+            fn p() -> i64 {
+                $p
+            }
+        }
+        pub type $mod_int = ModInt<$mod>;
+    };
+}
+define_mod_int_p!(Mod1000000007, ModInt1000000007, 100000007);
+define_mod_int_p!(Mod998244353, ModInt998244353, 998244353);
+
+pub struct ProconReader<R> {
+    r: R,
+    line: String,
+    i: usize,
+}
+
+impl<R: std::io::BufRead> ProconReader<R> {
     pub fn new(reader: R) -> Self {
-        Self { reader }
+        Self {
+            r: reader,
+            line: String::new(),
+            i: 0,
+        }
     }
-    pub fn get<T: std::str::FromStr>(&mut self) -> T {
-        use std::io::Read;
-        let buf = self
-            .reader
-            .by_ref()
-            .bytes()
-            .map(|b| b.unwrap())
-            .skip_while(|&byte| byte == b' ' || byte == b'\n' || byte == b'\r')
-            .take_while(|&byte| byte != b' ' && byte != b'\n' && byte != b'\r')
-            .collect::<Vec<_>>();
-        std::str::from_utf8(&buf)
-            .unwrap()
-            .parse()
-            .ok()
-            .expect("Parse Error.")
+    pub fn get<T>(&mut self) -> T
+    where
+        T: std::str::FromStr,
+        <T as std::str::FromStr>::Err: std::fmt::Debug,
+    {
+        self.skip_blanks();
+        assert!(self.i < self.line.len());
+        assert_ne!(&self.line[self.i..=self.i], " ");
+        let line = &self.line[self.i..];
+        let end = line.find(' ').unwrap_or_else(|| line.len());
+        let s = &line[..end];
+        self.i += end;
+        s.parse()
+            .unwrap_or_else(|_| panic!("parse error `{}`", self.line))
+    }
+    fn skip_blanks(&mut self) {
+        loop {
+            let start = self.line[self.i..].find(|ch| ch != ' ');
+            match start {
+                Some(j) => {
+                    self.i += j;
+                    break;
+                }
+                None => {
+                    self.line.clear();
+                    self.i = 0;
+                    let num_bytes = self.r.read_line(&mut self.line).unwrap();
+                    assert!(num_bytes > 0, "reached EOF :(");
+                    self.line = self.line.trim_end_matches(&['\r', '\n'][..]).to_string();
+                }
+            }
+        }
+    }
+    pub fn get_vec<T>(&mut self, n: usize) -> Vec<T>
+    where
+        T: std::str::FromStr,
+        <T as std::str::FromStr>::Err: std::fmt::Debug,
+    {
+        (0..n).map(|_| self.get()).collect()
     }
 }

@@ -10,35 +10,20 @@ fn main() {
     let x = x.abs() as usize;
     let a = s.iter().filter(|&&c| c == 'S').count();
     let b = s.iter().filter(|&&c| c != 'S').count();
-    use mint::Mint;
-    let mo: u64 = 1_000_000_000 + 7;
 
-    let mut fac = vec![Mint::new(0, mo); n + 1];
-    fac[0] = Mint::new(1, mo);
-    for i in 1..=n {
-        fac[i] = fac[i - 1] * (i as u64);
-    }
-    let mut inv_fac = vec![Mint::new(0, mo); n + 1];
-    inv_fac[n] = fac[n].inv();
-    for i in (0..n).rev() {
-        inv_fac[i] = inv_fac[i + 1] * ((i + 1) as u64);
-    }
-    let binom = |n, k| {
-        if n < k {
-            return Mint::new(0, mo);
-        }
-        fac[n] / fac[k] / fac[n - k]
-    };
+    type Mint = ModInt1000000007;
+    let binom = make_binom_func(n + 1, Mod1000000007::p());
+    let binom_m = |n, k| Mint::new(binom(n, k));
 
-    let mut cum = vec![Mint::new(0, mo); b + 1];
+    let mut cum = vec![Mint::new(0); b + 1];
     for i in 0..=b {
-        cum[i] = binom(b, i) * Mint::new(2, mo).pow((b - i) as u64);
+        cum[i] = binom_m(b, i) * Mint::new(2).pow((b - i) as u64);
         if i >= 1 {
             cum[i] = cum[i] + cum[i - 1];
         }
     }
 
-    let mut ans = Mint::new(0, mo);
+    let mut ans = Mint::new(0);
     for i in 0..=a {
         if i % 2 != x % 2 {
             continue;
@@ -47,213 +32,119 @@ fn main() {
         let y = (y + 6 - 1) / 6;
         if y <= b {
             let s = if y >= 1 { cum[b] - cum[y - 1] } else { cum[b] };
-            ans = ans + binom(a, i) * Mint::new(2, mo).pow((a - i) as u64) * s;
+            ans = ans + binom_m(a, i) * Mint::new(2).pow((a - i) as u64) * s;
         }
     }
-    println!("{}", ans);
+    println!("{}", ans.val());
 }
 
-#[allow(dead_code)]
-mod mint {
-    use std::ops::{Add, BitAnd, Div, Mul, Rem, Shr, Sub};
-
-    #[derive(Copy, Clone, Debug)]
-    pub struct Mint<T> {
-        x: T,
-        mo: T,
+pub fn make_binom_func(len: usize, mo: i64) -> impl Fn(usize, usize) -> i64 {
+    let mut fac = vec![0; len];
+    let mut inv = vec![0; len];
+    let mut inv_fac = vec![0; len];
+    fac[0] = 1;
+    fac[1] = 1;
+    inv[1] = 1;
+    inv_fac[0] = 1;
+    inv_fac[1] = 1;
+    for i in 2..len {
+        fac[i] = fac[i - 1] * (i as i64) % mo;
+        inv[i] = (-inv[(mo as usize) % i] * (mo / (i as i64))).rem_euclid(mo);
+        inv_fac[i] = inv_fac[i - 1] * inv[i] % mo;
     }
-
-    impl<T> Mint<T>
-    where
-        T: Copy,
-    {
-        pub fn new(x: T, mo: T) -> Mint<T> {
-            Mint { x, mo }
+    move |n: usize, k: usize| -> i64 {
+        if n < k {
+            return 0;
         }
+        ((fac[n] * inv_fac[k]) % mo * inv_fac[n - k]) % mo
     }
+}
 
-    impl<T> Mint<T>
-    where
-        T: Copy,
-    {
-        pub fn val(&self) -> T {
-            self.x
-        }
-        pub fn mo(&self) -> T {
-            self.mo
-        }
+use std::fmt::Debug;
+use std::marker::PhantomData;
+use std::ops::{Add, Div, Mul, Sub};
+
+pub trait Modulo: Copy + Clone + Debug {
+    fn p() -> i64;
+}
+
+#[derive(Copy, Clone, Debug)]
+pub struct ModInt<M>(i64, PhantomData<M>);
+
+impl<M: Modulo> ModInt<M> {
+    pub fn new(x: i64) -> Self {
+        Self(x.rem_euclid(M::p()), PhantomData)
     }
-
-    impl<T> Add<T> for Mint<T>
-    where
-        T: Copy,
-        T: Add<Output = T>,
-        T: Rem<Output = T>,
-    {
-        type Output = Mint<T>;
-        fn add(self, rhs: T) -> Mint<T> {
-            Mint::new((self.val() + rhs % self.mo()) % self.mo(), self.mo())
-        }
+    pub fn val(self) -> i64 {
+        self.0
     }
-
-    impl<T> Add<Mint<T>> for Mint<T>
-    where
-        T: Copy,
-        Mint<T>: Add<T, Output = Mint<T>>,
-    {
-        type Output = Mint<T>;
-        fn add(self, rhs: Mint<T>) -> Mint<T> {
-            self + rhs.val()
-        }
+    pub fn mo(self) -> i64 {
+        M::p()
     }
-
-    impl<T> Sub<T> for Mint<T>
-    where
-        T: Copy,
-        T: Add<Output = T>,
-        T: Sub<Output = T>,
-        T: Rem<Output = T>,
-    {
-        type Output = Mint<T>;
-        fn sub(self, rhs: T) -> Mint<T> {
-            Mint::new(
-                (self.val() + self.mo() - rhs % self.mo()) % self.mo(),
-                self.mo(),
-            )
-        }
-    }
-
-    impl<T> Sub<Mint<T>> for Mint<T>
-    where
-        T: Copy,
-        Mint<T>: Sub<T, Output = Mint<T>>,
-    {
-        type Output = Mint<T>;
-        fn sub(self, rhs: Mint<T>) -> Mint<T> {
-            self - rhs.val()
-        }
-    }
-
-    impl<T> Mul<T> for Mint<T>
-    where
-        T: Copy,
-        T: Mul<Output = T>,
-        T: Rem<Output = T>,
-    {
-        type Output = Mint<T>;
-        fn mul(self, rhs: T) -> Mint<T> {
-            Mint::new((self.val() * rhs % self.mo()) % self.mo(), self.mo())
-        }
-    }
-
-    impl<T> Mul<Mint<T>> for Mint<T>
-    where
-        T: Copy,
-        Mint<T>: Mul<T, Output = Mint<T>>,
-    {
-        type Output = Mint<T>;
-        fn mul(self, rhs: Mint<T>) -> Mint<T> {
-            self * rhs.val()
-        }
-    }
-
-    impl<T> Mint<T>
-    where
-        T: Copy,
-        T: Sub<Output = T>,
-        T: Div<Output = T>,
-        T: PartialOrd,
-        T: PartialEq,
-        T: BitAnd<Output = T>,
-        T: Shr<Output = T>,
-        Mint<T>: Mul<Output = Mint<T>>,
-    {
-        pub fn pow(self, y: T) -> Mint<T> {
-            let one = self.mo() / self.mo();
-            let zero = self.mo() - self.mo();
-            let mut res = Mint::one(self.mo());
-            let mut base = self;
-            let mut exp = y;
-            while exp > zero {
-                if (exp & one) == one {
-                    res = res * base;
-                }
-                base = base * base;
-                exp = exp >> one;
+    pub fn pow(self, exp: u64) -> Self {
+        let mut res = Self::new(1);
+        let mut base = self;
+        let mut exp = exp;
+        while exp > 0 {
+            if exp & 1 == 1 {
+                res = res * base;
             }
-            res
+            base = base * base;
+            exp >>= 1;
         }
+        res
     }
-
-    impl<T> Div<T> for Mint<T>
-    where
-        T: Copy,
-        T: Sub<Output = T>,
-        T: Div<Output = T>,
-        T: PartialOrd,
-        T: PartialEq,
-        T: BitAnd<Output = T>,
-        T: Shr<Output = T>,
-        Mint<T>: Mul<Output = Mint<T>>,
-    {
-        type Output = Mint<T>;
-        fn div(self, rhs: T) -> Mint<T> {
-            let one = self.mo() / self.mo();
-            self * Mint::new(rhs, self.mo()).pow(self.mo() - one - one)
-        }
+    pub fn inv(self) -> Self {
+        assert_ne!(self.0, 0, "Don't divide by zero!");
+        self.pow(M::p() as u64 - 2)
     }
-
-    impl<T> Div<Mint<T>> for Mint<T>
-    where
-        T: Copy,
-        Mint<T>: Div<T, Output = Mint<T>>,
-    {
-        type Output = Mint<T>;
-        fn div(self, rhs: Mint<T>) -> Mint<T> {
-            self / rhs.val()
-        }
-    }
-
-    impl<T> Mint<T>
-    where
-        T: Copy,
-        T: Div<Output = T>,
-        Mint<T>: Div<Output = Mint<T>>,
-    {
-        pub fn inv(self) -> Mint<T> {
-            Mint::one(self.mo()) / self
-        }
-    }
-
-    impl<T> std::fmt::Display for Mint<T>
-    where
-        T: Copy + std::fmt::Display,
-    {
-        fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-            write!(f, "{}", self.val())
-        }
-    }
-
-    impl<T> Mint<T>
-    where
-        T: Copy,
-        T: Sub<Output = T>,
-    {
-        pub fn zero(mo: T) -> Mint<T> {
-            Mint { x: mo - mo, mo }
-        }
-    }
-
-    impl<T> Mint<T>
-    where
-        T: Copy,
-        T: Div<Output = T>,
-    {
-        pub fn one(mo: T) -> Mint<T> {
-            Mint { x: mo / mo, mo }
-        }
+    pub fn new_frac(numer: i64, denom: i64) -> Self {
+        Self::new(numer) / Self::new(denom)
     }
 }
+
+impl<M: Modulo> Add for ModInt<M> {
+    type Output = ModInt<M>;
+    fn add(self, rhs: ModInt<M>) -> Self::Output {
+        Self((self.0 + rhs.0) % M::p(), PhantomData)
+    }
+}
+
+impl<M: Modulo> Sub for ModInt<M> {
+    type Output = ModInt<M>;
+    fn sub(self, rhs: ModInt<M>) -> Self::Output {
+        Self((self.0 - rhs.0).rem_euclid(M::p()), PhantomData)
+    }
+}
+
+impl<M: Modulo> Mul for ModInt<M> {
+    type Output = ModInt<M>;
+    fn mul(self, rhs: ModInt<M>) -> Self::Output {
+        Self((self.0 * rhs.0) % M::p(), PhantomData)
+    }
+}
+
+impl<M: Modulo> Div for ModInt<M> {
+    type Output = ModInt<M>;
+    fn div(self, rhs: ModInt<M>) -> Self::Output {
+        self * rhs.inv()
+    }
+}
+
+macro_rules! define_mod_int_p {
+    ($mod: ident, $mod_int: ident, $p: expr) => {
+        #[derive(Clone, Copy, Debug)]
+        pub struct $mod;
+        impl Modulo for $mod {
+            fn p() -> i64 {
+                $p
+            }
+        }
+        pub type $mod_int = ModInt<$mod>;
+    };
+}
+define_mod_int_p!(Mod1000000007, ModInt1000000007, 1000000007);
+define_mod_int_p!(Mod998244353, ModInt998244353, 998244353);
 
 pub struct ProconReader<R> {
     r: R,

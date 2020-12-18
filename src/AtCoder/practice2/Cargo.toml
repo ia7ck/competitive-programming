@@ -1,4 +1,6 @@
 [workspace]
 members = [
-    "a","b"
+    "a",
+    "b",
+    "j"
 ]

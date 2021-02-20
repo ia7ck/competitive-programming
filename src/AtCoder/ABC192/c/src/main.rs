@@ -1,0 +1,120 @@
+fn digits(x: u64) -> Vec<u64> {
+    if x == 0 {
+        return vec![0];
+    }
+    let mut x = x;
+    let mut res = vec![];
+    while x != 0 {
+        res.push(x % 10);
+        x /= 10;
+    }
+    res.reverse();
+    res
+}
+
+fn number(d: Vec<u64>) -> u64 {
+    let mut res = 0;
+    let mut ten = 1;
+    for x in d.iter().rev() {
+        res += x * ten;
+        ten *= 10;
+    }
+    res
+}
+
+fn g1(x: u64) -> u64 {
+    let mut d = digits(x);
+    d.sort();
+    d.reverse();
+    number(d)
+}
+
+fn g2(x: u64) -> u64 {
+    let mut d = digits(x);
+    d.sort();
+    number(d)
+}
+
+fn f(x: u64) -> u64 {
+    g1(x) - g2(x)
+}
+
+fn main() {
+    let stdin = std::io::stdin();
+    let mut rd = ProconReader::new(stdin.lock());
+
+    let n: u64 = rd.get();
+    let k: usize = rd.get();
+
+    let mut a = n;
+    for _ in 0..k {
+        a = f(a);
+    }
+    println!("{}", a);
+}
+
+pub struct ProconReader<R> {
+    r: R,
+    l: String,
+    i: usize,
+}
+
+impl<R: std::io::BufRead> ProconReader<R> {
+    pub fn new(reader: R) -> Self {
+        Self {
+            r: reader,
+            l: String::new(),
+            i: 0,
+        }
+    }
+    pub fn get<T>(&mut self) -> T
+    where
+        T: std::str::FromStr,
+        <T as std::str::FromStr>::Err: std::fmt::Debug,
+    {
+        self.skip_blanks();
+        assert!(self.i < self.l.len()); // remain some character
+        assert_ne!(&self.l[self.i..=self.i], " ");
+        let rest = &self.l[self.i..];
+        let len = rest.find(' ').unwrap_or_else(|| rest.len());
+        // parse self.l[self.i..(self.i + len)]
+        let val = rest[..len]
+            .parse()
+            .unwrap_or_else(|e| panic!("{:?}, attempt to read `{}`", e, rest));
+        self.i += len;
+        val
+    }
+    fn skip_blanks(&mut self) {
+        loop {
+            match self.l[self.i..].find(|ch| ch != ' ') {
+                Some(j) => {
+                    self.i += j;
+                    break;
+                }
+                None => {
+                    let mut buf = String::new();
+                    let num_bytes = self
+                        .r
+                        .read_line(&mut buf)
+                        .unwrap_or_else(|_| panic!("invalid UTF-8"));
+                    assert!(num_bytes > 0, "reached EOF :(");
+                    self.l = buf
+                        .trim_end_matches('\n')
+                        .trim_end_matches('\r')
+                        .to_string();
+                    self.i = 0;
+                }
+            }
+        }
+    }
+    pub fn get_vec<T>(&mut self, n: usize) -> Vec<T>
+    where
+        T: std::str::FromStr,
+        <T as std::str::FromStr>::Err: std::fmt::Debug,
+    {
+        (0..n).map(|_| self.get()).collect()
+    }
+    pub fn get_chars(&mut self) -> Vec<char> {
+        self.get::<String>().chars().collect()
+    }
+}

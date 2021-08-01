@@ -7,3 +7,5 @@ edition = "2018"
 [dependencies]
 procon_reader = { git = "https://github.com/ia7ck/rust-competitive-programming" }
 binary_search = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+divisors = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+mod_int = { git = "https://github.com/ia7ck/rust-competitive-programming" }

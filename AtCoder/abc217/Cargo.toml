@@ -8,3 +8,4 @@ edition = "2018"
 procon_reader = { git = "https://github.com/ia7ck/rust-competitive-programming" }
 join = { git = "https://github.com/ia7ck/rust-competitive-programming" }
 mod_int = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+factorials = { git = "https://github.com/ia7ck/rust-competitive-programming" }

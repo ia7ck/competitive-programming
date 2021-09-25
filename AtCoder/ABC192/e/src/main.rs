@@ -1,31 +1,49 @@
+use input_i_scanner::{scan_with, InputIScanner};
+
+#[derive(Clone, Copy)]
+struct EdgeImpl {
+    from: usize,
+    to: usize,
+    t: u64,
+    k: u64,
+}
+
+impl Edge<u64> for EdgeImpl {
+    fn from(&self) -> usize {
+        self.from
+    }
+    fn to(&self) -> usize {
+        self.to
+    }
+    fn dist(&self, d: u64) -> u64 {
+        (d + self.k - 1) / self.k * self.k + self.t
+    }
+}
+
 fn main() {
     let stdin = std::io::stdin();
-    let mut rd = ProconReader::new(stdin.lock());
+    let mut _i_i = InputIScanner::from(stdin.lock());
 
-    let n: usize = rd.get();
-    let m: usize = rd.get();
-    let s: usize = rd.get();
-    let goal: usize = rd.get();
-    let s = s - 1;
+    let (n, m, start, goal) = scan_with!(_i_i, (usize, usize, usize, usize));
+    let start = start - 1;
     let goal = goal - 1;
-    let mut g = vec![vec![]; n];
+    let mut edges = Vec::new();
     for _ in 0..m {
-        let a: usize = rd.get();
-        let b: usize = rd.get();
-        let t: u64 = rd.get();
-        let k: u64 = rd.get();
-        g[a - 1].push(Edge {
+        let (a, b, t, k) = scan_with!(_i_i, (usize, usize, u64, u64));
+        edges.push(EdgeImpl {
+            from: a - 1,
             to: b - 1,
-            cost: t,
+            t,
             k,
         });
-        g[b - 1].push(Edge {
+        edges.push(EdgeImpl {
+            from: b - 1,
             to: a - 1,
-            cost: t,
+            t,
             k,
         });
     }
-    let (d, _prev) = dijkstra(&g, s);
+    let (d, _prev) = dijkstra(n, edges.iter().copied(), start);
     if let Some(ans) = d[goal] {
         println!("{}", ans);
     } else {
@@ -33,101 +51,57 @@ fn main() {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
-pub struct Edge {
-    pub to: usize,
-    pub cost: u64,
-    pub k: u64,
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
+use std::fmt::Debug;
+use std::ops::Add;
+
+pub trait Edge<T> {
+    fn from(&self) -> usize;
+    fn to(&self) -> usize;
+    fn dist(&self, d: T) -> T;
 }
 
-#[allow(clippy::many_single_char_names)]
-pub fn dijkstra(g: &[Vec<Edge>], s: usize) -> (Vec<Option<u64>>, Vec<Option<usize>>) {
-    use std::cmp::Reverse;
-    use std::collections::BinaryHeap;
-    let n = g.len();
+pub fn dijkstra<I, E, T>(n: usize, edges: I, s: usize) -> (Vec<Option<T>>, Vec<Option<usize>>)
+where
+    I: Iterator<Item = E>,
+    E: Edge<T> + Clone,
+    T: Copy + Add<Output = T> + Default + Ord + Debug,
+{
+    let mut adj = vec![vec![]; n];
+    for e in edges {
+        adj[e.from()].push(e);
+    }
     let mut dist = vec![None; n];
-    let mut q = BinaryHeap::new();
+    let mut heap = BinaryHeap::new();
     let mut prev = vec![None; n];
-    dist[s] = Some(0);
-    q.push((Reverse(0), s));
-    while let Some((Reverse(d), v)) = q.pop() {
-        if dist[v].map_or(false, |min| d > min) {
-            continue;
+    dist[s] = Some(T::default());
+    heap.push((Reverse(T::default()), s));
+    while let Some((Reverse(d), v)) = heap.pop() {
+        match dist[v] {
+            Some(dv) => {
+                if dv < d {
+                    continue;
+                } else {
+                    assert_eq!(dv, d);
+                }
+            }
+            None => unreachable!(),
         }
-        for e in &g[v] {
-            let next_d = (d + e.k - 1) / e.k * e.k + e.cost;
-            if dist[e.to].map_or(true, |cur_d| next_d < cur_d) {
-                dist[e.to] = Some(next_d);
-                prev[e.to] = Some(v);
-                q.push((Reverse(next_d), e.to));
+        for e in &adj[v] {
+            let next_d = e.dist(d);
+            let to = e.to();
+            match dist[to] {
+                Some(dt) if dt <= next_d => {
+                    continue;
+                }
+                _ => {
+                    dist[to] = Some(next_d);
+                    prev[to] = Some(v);
+                    heap.push((Reverse(next_d), to));
+                }
             }
         }
     }
     (dist, prev)
-}
-
-pub struct ProconReader<R> {
-    r: R,
-    l: String,
-    i: usize,
-}
-
-impl<R: std::io::BufRead> ProconReader<R> {
-    pub fn new(reader: R) -> Self {
-        Self {
-            r: reader,
-            l: String::new(),
-            i: 0,
-        }
-    }
-    pub fn get<T>(&mut self) -> T
-    where
-        T: std::str::FromStr,
-        <T as std::str::FromStr>::Err: std::fmt::Debug,
-    {
-        self.skip_blanks();
-        assert!(self.i < self.l.len()); // remain some character
-        assert_ne!(&self.l[self.i..=self.i], " ");
-        let rest = &self.l[self.i..];
-        let len = rest.find(' ').unwrap_or_else(|| rest.len());
-        // parse self.l[self.i..(self.i + len)]
-        let val = rest[..len]
-            .parse()
-            .unwrap_or_else(|e| panic!("{:?}, attempt to read `{}`", e, rest));
-        self.i += len;
-        val
-    }
-    fn skip_blanks(&mut self) {
-        loop {
-            match self.l[self.i..].find(|ch| ch != ' ') {
-                Some(j) => {
-                    self.i += j;
-                    break;
-                }
-                None => {
-                    let mut buf = String::new();
-                    let num_bytes = self
-                        .r
-                        .read_line(&mut buf)
-                        .unwrap_or_else(|_| panic!("invalid UTF-8"));
-                    assert!(num_bytes > 0, "reached EOF :(");
-                    self.l = buf
-                        .trim_end_matches('\n')
-                        .trim_end_matches('\r')
-                        .to_string();
-                    self.i = 0;
-                }
-            }
-        }
-    }
-    pub fn get_vec<T>(&mut self, n: usize) -> Vec<T>
-    where
-        T: std::str::FromStr,
-        <T as std::str::FromStr>::Err: std::fmt::Debug,
-    {
-        (0..n).map(|_| self.get()).collect()
-    }
-    pub fn get_chars(&mut self) -> Vec<char> {
-        self.get::<String>().chars().collect()
-    }
 }

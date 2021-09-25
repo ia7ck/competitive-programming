@@ -1,4 +1,4 @@
-use input_i_scanner::{scan_with, InputIScanner};
+use proconio::input;
 
 #[derive(Clone, Copy)]
 struct EdgeImpl {
@@ -21,15 +21,22 @@ impl Edge<u64> for EdgeImpl {
 }
 
 fn main() {
-    let stdin = std::io::stdin();
-    let mut _i_i = InputIScanner::from(stdin.lock());
-
-    let (n, m, start, goal) = scan_with!(_i_i, (usize, usize, usize, usize));
+    input! {
+        n: usize,
+        m: usize,
+        start: usize,
+        goal: usize,
+    }
     let start = start - 1;
     let goal = goal - 1;
     let mut edges = Vec::new();
     for _ in 0..m {
-        let (a, b, t, k) = scan_with!(_i_i, (usize, usize, u64, u64));
+        input! {
+            a: usize,
+            b: usize,
+            t: u64,
+            k: u64,
+        }
         edges.push(EdgeImpl {
             from: a - 1,
             to: b - 1,

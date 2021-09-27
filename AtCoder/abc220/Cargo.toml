@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 input_i_scanner = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+mod_int = { git = "https://github.com/ia7ck/rust-competitive-programming" }

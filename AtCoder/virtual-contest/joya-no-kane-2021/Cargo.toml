@@ -1,0 +1,16 @@
+[package]
+name = "joya-no-kane-2021"
+version = "0.0.0"
+authors = ["ia7ck <23146842+ia7ck@users.noreply.github.com>"]
+edition = "2018"
+
+[dependencies]
+input_i_scanner = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+join = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+mod_int = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+factorials = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+grid_search = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+divisors = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+binary_search = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+segment_tree = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+union_find = { git = "https://github.com/ia7ck/rust-competitive-programming" }

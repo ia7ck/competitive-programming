@@ -1,0 +1,11 @@
+[package]
+name = "abc239"
+version = "0.0.0"
+authors = ["ia7ck <23146842+ia7ck@users.noreply.github.com>"]
+edition = "2018"
+
+[dependencies]
+scanner = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+scanner_proc_macro = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+least_prime_factors = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+union_find = { git = "https://github.com/ia7ck/rust-competitive-programming" }

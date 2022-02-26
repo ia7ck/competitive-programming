@@ -1,0 +1,12 @@
+[package]
+name = "abc241"
+version = "0.0.0"
+authors = ["ia7ck <23146842+ia7ck@users.noreply.github.com>"]
+edition = "2018"
+
+[dependencies]
+scanner = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+scanner_proc_macro = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+coordinate_compression = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+dijkstra = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+binary_search = { git = "https://github.com/ia7ck/rust-competitive-programming" }

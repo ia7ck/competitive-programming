@@ -1,0 +1,8 @@
+[package]
+name = "arc137"
+version = "0.0.0"
+edition = "2018"
+
+[dependencies]
+scanner = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+scanner_proc_macro = { git = "https://github.com/ia7ck/rust-competitive-programming" }

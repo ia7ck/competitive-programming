@@ -6,3 +6,5 @@ edition = "2018"
 [dependencies]
 proconio = { version = "=0.3.6", features = ["derive"] }
 binary_search_range = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+join = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+mod_int = { git = "https://github.com/ia7ck/rust-competitive-programming" }

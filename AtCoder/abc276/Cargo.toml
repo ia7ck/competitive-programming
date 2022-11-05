@@ -1,0 +1,10 @@
+[package]
+name = "abc276"
+version = "0.0.0"
+edition = "2018"
+
+[dependencies]
+proconio = { version = "=0.3.6" }
+join = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+fenwick_tree = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+mod_int = { git = "https://github.com/ia7ck/rust-competitive-programming" }

@@ -5,3 +5,4 @@ edition = "2018"
 
 [dependencies]
 proconio = { version = "=0.3.6" }
+union_find = { git = "https://github.com/ia7ck/rust-competitive-programming" }

@@ -1,0 +1,10 @@
+[package]
+name = "abc280"
+version = "0.0.0"
+edition = "2018"
+
+[dependencies]
+proconio = { version = "=0.3.6" }
+prime_factorization = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+mod_int = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+union_find = { git = "https://github.com/ia7ck/rust-competitive-programming" }

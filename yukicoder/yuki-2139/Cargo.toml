@@ -1,0 +1,8 @@
+[package]
+name = "yuki-2139"
+version = "0.0.0"
+edition = "2018"
+
+[dependencies]
+proconio = { version = "=0.3.6" }
+segment_tree = { git = "https://github.com/ia7ck/rust-competitive-programming" }

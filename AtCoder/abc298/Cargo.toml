@@ -6,3 +6,4 @@ edition = "2018"
 [dependencies]
 proconio = { version = "=0.3.6" }
 mod_int = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+# cumulative_sum_2d = { git = "https://github.com/ia7ck/rust-competitive-programming" }

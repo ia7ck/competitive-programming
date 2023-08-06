@@ -1,0 +1,8 @@
+[package]
+name = "codequeen2023-final-open"
+version = "0.0.0"
+edition = "2018"
+
+[dependencies]
+proconio = { version = "=0.3.6" }
+lowest_common_ancestor = { git = "https://github.com/ia7ck/rust-competitive-programming" }

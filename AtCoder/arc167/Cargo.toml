@@ -8,3 +8,4 @@ proconio = { version = "=0.4.5" }
 prime_factorization= { git = "https://github.com/ia7ck/rust-competitive-programming" }
 mod_int = { git = "https://github.com/ia7ck/rust-competitive-programming" }
 floor_sqrt = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+num-bigint = { version = "0.4.3" }

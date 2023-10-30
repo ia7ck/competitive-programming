@@ -1,4 +1,3 @@
-use binary_search_range::BinarySearchRange;
 use proconio::input;
 
 fn main() {
@@ -10,9 +9,9 @@ fn main() {
 
     a.sort();
     let mut ans = 0;
-    for &x in &a {
-        let rng = a.range(x..(x + m));
-        ans = ans.max(rng.len());
+    for i in 0..n {
+        let j = a.partition_point(|&x| x < a[i] + m);
+        ans = ans.max(j - i);
     }
     println!("{}", ans);
 }

@@ -43,7 +43,6 @@ fn main() {
 
                     // β → α
                     if j + 1 == m && s[i + 1] == t[k] {
-                        eprintln!("i + 1 = {}, k = {}", i + 1, k);
                         dp[i + 1][k] = true;
                     }
                 }

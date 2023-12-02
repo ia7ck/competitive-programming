@@ -1,0 +1,9 @@
+[package]
+name = "green-471"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+proconio = { version = "=0.4.5" }
+next_permutation = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+union_find = { git = "https://github.com/ia7ck/rust-competitive-programming" }

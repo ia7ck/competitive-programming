@@ -1,0 +1,9 @@
+[package]
+name = "abc348"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+proconio = { version = "=0.4.5" }
+grid_search = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+fixedbitset = { version = "=0.4.2" }

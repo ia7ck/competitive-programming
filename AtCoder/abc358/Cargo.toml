@@ -1,0 +1,9 @@
+[package]
+name = "abc358"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+proconio = { version = "=0.4.5" }
+mod_int = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+factorials = { git = "https://github.com/ia7ck/rust-competitive-programming" }

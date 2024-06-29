@@ -1,78 +1,47 @@
 use proconio::{input, marker::Usize1};
 
-const P: usize = 1_000_000_000 + 7;
-
 fn main() {
     input! {
         n: usize,
-        edges: [(Usize1, Usize1); n - 1],
-    }
+        edges: [(Usize1, Usize1, u64); n - 1],
+        d: [u64; n],
+    };
 
     let edges = edges
         .into_iter()
-        .map(|(u, v)| (u, v, ()))
+        .map(|(u, v, w)| (u, v, E(w)))
         .collect::<Vec<_>>();
 
-    let mut fact = vec![1; n + 1];
-    for i in 2..=n {
-        fact[i] = fact[i - 1] * i % P;
-    }
-    let mut inv_fact = vec![1; n + 1];
-    for i in 2..=n {
-        inv_fact[i] = mpow(fact[i], P - 2);
-    }
-    for i in 1..=n {
-        assert_eq!(fact[i] * inv_fact[i] % P, 1);
-    }
-
-    let ans = rerooting(n, &edges, S { fact, inv_fact });
+    let ans = rerooting(n, &edges, S { d });
     for ans in ans {
-        println!("{}", ans.dp);
+        println!("{}", ans.0);
     }
 }
 
-fn mpow(a: usize, x: usize) -> usize {
-    if x == 0 {
-        1
-    } else if x % 2 == 0 {
-        mpow(a * a % P, x / 2)
-    } else {
-        a * mpow(a, x - 1) % P
-    }
-}
+#[derive(Clone)]
+struct E(u64);
+
+#[derive(Clone)]
+struct V(u64);
 
 struct S {
-    fact: Vec<usize>,
-    inv_fact: Vec<usize>,
-}
-
-#[derive(Clone, Debug)]
-struct V {
-    s: usize,
-    dp: usize,
+    d: Vec<u64>,
 }
 
 impl RerootingOperator for S {
-    type EdgeAttr = ();
+    type EdgeAttr = E;
     type Value = V;
 
     fn identity(&self) -> Self::Value {
-        V { s: 0, dp: 1 }
+        V(0)
     }
 
-    fn fold(&self, _c_i: usize, c_v: &Self::Value, _e: &Self::EdgeAttr) -> Self::Value {
-        V {
-            s: c_v.s + 1,
-            dp: c_v.dp,
-        }
+    fn fold(&self, c_i: usize, c_v: &Self::Value, e: &Self::EdgeAttr) -> Self::Value {
+        V((c_v.0 + e.0).max(self.d[c_i] + e.0))
     }
 
     fn reduce(&self, a_v: &Self::Value, b_v: &Self::Value) -> Self::Value {
-        let choose = self.fact[a_v.s + b_v.s] * self.inv_fact[a_v.s] % P * self.inv_fact[b_v.s] % P;
-        V {
-            s: a_v.s + b_v.s,
-            dp: choose * a_v.dp % P * b_v.dp % P,
-        }
+        V(a_v.0.max(b_v.0))
     }
 }
 

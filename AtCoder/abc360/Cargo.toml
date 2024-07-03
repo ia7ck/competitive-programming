@@ -7,3 +7,5 @@ edition = "2021"
 proconio = { version = "=0.4.5" }
 mod_int = { git = "https://github.com/ia7ck/rust-competitive-programming" }
 segment_tree = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+zarts = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+ac-library-rs = { version = "0.1.1" }

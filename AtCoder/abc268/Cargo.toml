@@ -1,8 +1,9 @@
 [package]
 name = "abc268"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
-proconio = { version = "=0.3.6" }
+proconio = { version = "=0.4.5" }
 next_permutation = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+rustc-hash = { version = "=1.1.0" }

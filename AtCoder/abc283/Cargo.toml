@@ -1,7 +1,8 @@
 [package]
 name = "abc283"
 version = "0.0.0"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
-proconio = { version = "=0.3.6" }
+proconio = { version = "=0.4.5" }
+segment_tree = { git = "https://github.com/ia7ck/rust-competitive-programming" }

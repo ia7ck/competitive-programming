@@ -1,0 +1,7 @@
+[package]
+name = "r965"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+next_permutation = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "9c9fc50" }

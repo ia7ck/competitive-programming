@@ -1,5 +1,5 @@
 use scanner::Scanner;
-use std::{collections::HashSet, io};
+use std::io;
 
 fn main() {
     let stdin = io::stdin();
@@ -9,7 +9,7 @@ fn main() {
 
     for _ in 0..t {
         let (n, q) = scan!((usize, usize), <~scanner);
-        let a = scan!([u32; n], <~scanner);
+        let a = scan!([usize; n], <~scanner);
         let queries = scan!([(usize, usize); q], <~scanner);
         let queries = queries
             .into_iter()
@@ -20,7 +20,7 @@ fn main() {
     }
 }
 
-fn solve(n: usize, q: usize, a: Vec<u32>, queries: Vec<(usize, usize)>) {
+fn solve(n: usize, q: usize, a: Vec<usize>, queries: Vec<(usize, usize)>) {
     let sqrt_q = (q as f64).sqrt() as usize;
     let mut ord = (0..q).collect::<Vec<_>>();
     ord.sort_by_key(|&i| {
@@ -29,13 +29,17 @@ fn solve(n: usize, q: usize, a: Vec<u32>, queries: Vec<(usize, usize)>) {
     });
 
     struct S {
-        set: HashSet<u32>,
+        present_odd: Vec<bool>,
+        count: usize,
     }
 
     let add = |state: &mut S, i: usize| {
-        let present = state.set.remove(&a[i]);
-        if !present {
-            state.set.insert(a[i]);
+        if state.present_odd[a[i]] {
+            state.present_odd[a[i]] = false;
+            state.count -= 1;
+        } else {
+            state.present_odd[a[i]] = true;
+            state.count += 1;
         }
     };
 
@@ -45,8 +49,11 @@ fn solve(n: usize, q: usize, a: Vec<u32>, queries: Vec<(usize, usize)>) {
     };
 
     let mut state = S {
-        set: HashSet::from([a[0]]),
+        present_odd: vec![false; 1_000_000 + 1],
+        count: 0,
     };
+    state.present_odd[a[0]] = true;
+    state.count += 1;
     let (mut left, mut right) = (0, 0);
     let mut ans = vec![false; q];
     for i in ord {
@@ -67,7 +74,7 @@ fn solve(n: usize, q: usize, a: Vec<u32>, queries: Vec<(usize, usize)>) {
             remove(&mut state, right);
             right -= 1;
         }
-        ans[i] = state.set.is_empty();
+        ans[i] = state.count == 0;
     }
 
     for draw in ans {

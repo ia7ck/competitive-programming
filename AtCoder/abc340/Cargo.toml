@@ -8,3 +8,4 @@ proconio = { version = "=0.4.5" }
 dijkstra = { git = "https://github.com/ia7ck/rust-competitive-programming" }
 ext_gcd = { git = "https://github.com/ia7ck/rust-competitive-programming" }
 mod_int = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "b0f3f75" }
+lowest_common_ancestor = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "b0f3f75" }

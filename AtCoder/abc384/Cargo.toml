@@ -12,5 +12,5 @@ ac-library-rs = { version = "=0.1.1" }
 # itertools = { version = "0.11.0" }
 
 grid_search = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "5ad057b" }
-zarts = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "5ad057b" }
+zarts = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "07aa711" }
 # fenwick_tree = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "5ad057b" }

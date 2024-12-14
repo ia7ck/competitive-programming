@@ -18,7 +18,9 @@ fn main() {
     for &x in &b {
         values.push(x);
     }
-    let seq = SortedSeq::from_iter(values);
+    let seq = SortedSeq::new(values);
+    let map_a = a.iter().map(|&x| seq.ord(&x)).collect::<Vec<_>>();
+    let map_b = b.iter().map(|&x| seq.ord(&x)).collect::<Vec<_>>();
 
     let q_sqrt = f64::sqrt(q as f64) as usize;
     let mut ord = (0..q).collect::<Vec<_>>();
@@ -37,7 +39,7 @@ fn main() {
     }
 
     let add_a = |state: &mut S, i: usize| {
-        let p = seq.ord(&a[i]);
+        let p = map_a[i];
         let small_v = state.v_b.sum(..p);
         let small_c = state.c_b.sum(..p);
         let large_v = state.v_b.sum(p..);
@@ -49,7 +51,7 @@ fn main() {
     };
 
     let remove_a = |state: &mut S, i: usize| {
-        let p = seq.ord(&a[i]);
+        let p = map_a[i];
         let small_v = state.v_b.sum(..p);
         let small_c = state.c_b.sum(..p);
         let large_v = state.v_b.sum(p..);
@@ -61,7 +63,7 @@ fn main() {
     };
 
     let add_b = |state: &mut S, i: usize| {
-        let p = seq.ord(&b[i]);
+        let p = map_b[i];
         let small_v = state.v_a.sum(..p);
         let small_c = state.c_a.sum(..p);
         let large_v = state.v_a.sum(p..);
@@ -73,7 +75,7 @@ fn main() {
     };
 
     let remove_b = |state: &mut S, i: usize| {
-        let p = seq.ord(&b[i]);
+        let p = map_b[i];
         let small_v = state.v_a.sum(..p);
         let small_c = state.c_a.sum(..p);
         let large_v = state.v_a.sum(p..);

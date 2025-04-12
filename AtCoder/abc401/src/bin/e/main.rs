@@ -22,11 +22,7 @@ fn main() {
     let mut heap = BinaryHeap::new();
     push[0] = true;
     f.add(0, 1);
-    for &x in &g[0] {
-        push[x] = true;
-        f.add(x, 1);
-        heap.push(Reverse(x));
-    }
+    heap.push(Reverse(0));
     for k in 0..n {
         while let Some(&Reverse(v)) = heap.peek() {
             if v > k {
@@ -41,7 +37,7 @@ fn main() {
                 }
             }
         }
-        
+
         // push[..=k].iter().all(|&p| p)
         if f.sum(..=k) == k + 1 {
             ans.push(Some(heap.len()));

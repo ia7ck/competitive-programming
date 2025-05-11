@@ -28,9 +28,13 @@ fn main() {
     for i in (1..n).rev() {
         inv_factorials[i] = inv_factorials[i + 1] * Mint::from(i + 1);
     }
+    let mut inv = vec![Mint::new(0); n + 1];
+    inv[1] = Mint::new(1);
+    for i in 2..=n {
+        inv[i] = (Mint::from(998244353) - inv[998244353 % i]) * (998244353 / i);
+    }
 
-    // let bucket_size = f64::sqrt(n as f64) as usize;
-    let bucket_size = 400;
+    let bucket_size = f64::sqrt(n as f64) as usize;
 
     struct S {
         buckets: Vec<Bucket>,
@@ -42,7 +46,8 @@ fn main() {
         let new_c = old_c + 1;
         state.buckets[bi].count[bj] = new_c;
         state.buckets[bi].total += 1;
-        state.buckets[bi].inv_fact_prod *= factorials[old_c] * inv_factorials[new_c];
+        // state.buckets[bi].inv_fact_prod *= factorials[old_c] * inv_factorials[new_c];
+        state.buckets[bi].inv_fact_prod *= inv[new_c];
     };
 
     let remove = |state: &mut S, i: usize| {
@@ -51,7 +56,8 @@ fn main() {
         let new_c = old_c - 1;
         state.buckets[bi].count[bj] = new_c;
         state.buckets[bi].total -= 1;
-        state.buckets[bi].inv_fact_prod *= factorials[old_c] * inv_factorials[new_c];
+        // state.buckets[bi].inv_fact_prod *= factorials[old_c] * inv_factorials[new_c];
+        state.buckets[bi].inv_fact_prod *= old_c;
     };
 
     let mut state = {

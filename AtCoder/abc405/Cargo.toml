@@ -12,3 +12,4 @@ proconio = { version = "=0.4.5" }
 # itertools = { version = "0.11.0" }
 
 grid_search = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "35b675c" }
+mod_int = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "35b675c" }

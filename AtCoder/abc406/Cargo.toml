@@ -11,4 +11,4 @@ proconio = { version = "=0.4.5" }
 # rand = { version = "0.8.5", features = ["small_rng"] } # https://rust-random.github.io/book/guide-rngs.html
 # itertools = { version = "0.11.0" }
 
-# _ = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "..." }
+segment_tree = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "35b675c" }

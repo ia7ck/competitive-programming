@@ -12,3 +12,4 @@ ac-library-rs = { version = "=0.1.1" }
 # itertools = { version = "0.11.0" }
 
 run_length = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "9c9fc50" }
+next_permutation = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "35b675c" }

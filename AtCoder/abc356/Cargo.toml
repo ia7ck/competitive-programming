@@ -5,4 +5,6 @@ edition = "2021"
 
 [dependencies]
 proconio = { version = "=0.4.5" }
-fenwick_tree = { git = "https://github.com/ia7ck/rust-competitive-programming" }
+rand = { version = "0.8.5", features = ["small_rng"] }
+fenwick_tree = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "35b675c" }
+zarts = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "35b675c" }

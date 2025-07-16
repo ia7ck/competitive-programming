@@ -2,7 +2,6 @@ use std::collections::BTreeSet;
 
 use fenwick_tree::FenwickTree;
 use proconio::input;
-use rand::{rngs::SmallRng, SeedableRng};
 use treap::Treap;
 use zarts::SortedSeq;
 
@@ -16,7 +15,7 @@ fn main() {
     let z = queries.iter().map(|&(_, x)| x).collect::<SortedSeq<_>>();
     let mut ft = FenwickTree::new(z.size(), 0);
     let mut pts = BTreeSet::new();
-    let mut start = Treap::new(SmallRng::seed_from_u64(123));
+    let mut start = Treap::default();
     for (op, x) in queries {
         if op == 1 {
             let ix = z.ord(&x);

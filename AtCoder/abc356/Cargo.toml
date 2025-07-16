@@ -8,4 +8,4 @@ proconio = { version = "=0.4.5" }
 rand = { version = "0.8.5", features = ["small_rng"] }
 fenwick_tree = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "35b675c" }
 zarts = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "35b675c" }
-treap = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "1b9a0e455d3a58420bd7c75fccd5fe72ce59f077" }
+treap = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "51c17b9" }

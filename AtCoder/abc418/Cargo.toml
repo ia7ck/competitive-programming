@@ -1,0 +1,17 @@
+[package]
+name = "abc418"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+# https://img.atcoder.jp/file/language-update/language-list.html
+proconio = { version = "=0.4.5" }
+# ac-library-rs = { version = "=0.1.1" }
+# memoise = { version = "0.3.2" }
+# rand = { version = "0.8.5", features = ["small_rng"] } # https://rust-random.github.io/book/guide-rngs.html
+# itertools = { version = "0.11.0" }
+# rustc-hash = { version = "1.1.0" }
+# fixedbitset = { version = "0.4.2" }
+# bitset-fixed = { version = "0.1.0" }
+
+# _ = { git = "https://github.com/ia7ck/rust-competitive-programming", rev = "..." }

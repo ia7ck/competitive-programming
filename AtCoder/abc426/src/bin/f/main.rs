@@ -24,25 +24,34 @@ fn main() {
             match range {
                 BucketRangeType::Whole(i) => {
                     if buckets[i].positive == 0 {
-                        assert_eq!(buckets[i].min, u64::MAX);
+                        assert!(buckets[i].min.is_none());
                         buckets[i].subtract += k;
-                    } else if buckets[i].min.saturating_sub(buckets[i].subtract) <= k {
+                    } else if buckets[i]
+                        .min
+                        .is_some_and(|min| min - buckets[i].subtract <= k)
+                    {
                         let sub = buckets[i].subtract;
                         let mut new_min = u64::MAX;
                         let mut new_positive = 0;
                         for x in &mut buckets[i].elements {
-                            *x = x.saturating_sub(sub);
+                            if let Some(x) = x {
+                                *x = x.saturating_sub(sub);
 
-                            let k = k.min(*x);
-                            *x -= k;
-                            ans += k;
+                                let k = k.min(*x);
+                                *x -= k;
+                                ans += k;
 
-                            if *x > 0 {
-                                new_min = new_min.min(*x);
-                                new_positive += 1;
+                                if *x > 0 {
+                                    new_min = new_min.min(*x);
+                                    new_positive += 1;
+                                }
                             }
                         }
-                        buckets[i].min = new_min;
+                        buckets[i].min = if new_min == u64::MAX {
+                            None
+                        } else {
+                            Some(new_min)
+                        };
                         buckets[i].positive = new_positive;
                         buckets[i].subtract = 0;
                     } else {
@@ -55,20 +64,26 @@ fn main() {
                     let mut new_min = u64::MAX;
                     let mut new_positive = 0;
                     for (j, x) in buckets[i].elements.iter_mut().enumerate() {
-                        *x = x.saturating_sub(sub);
+                        if let Some(x) = x {
+                            *x = x.saturating_sub(sub);
 
-                        if r.contains(&j) {
-                            let k = k.min(*x);
-                            *x -= k;
-                            ans += k;
-                        }
+                            if r.contains(&j) {
+                                let k = k.min(*x);
+                                *x -= k;
+                                ans += k;
+                            }
 
-                        if *x > 0 {
-                            new_min = new_min.min(*x);
-                            new_positive += 1;
+                            if *x > 0 {
+                                new_min = new_min.min(*x);
+                                new_positive += 1;
+                            }
                         }
                     }
-                    buckets[i].min = new_min;
+                    buckets[i].min = if new_min == u64::MAX {
+                        None
+                    } else {
+                        Some(new_min)
+                    };
                     buckets[i].positive = new_positive;
                     buckets[i].subtract = 0;
                 }
@@ -80,17 +95,17 @@ fn main() {
 
 #[derive(Debug)]
 struct Bucket {
-    elements: Vec<u64>,
-    min: u64,        // min {x | 0 < x in elements}
-    positive: usize, // #{ 0 < x in elements }
-    subtract: u64,   // < min
+    elements: Vec<Option<u64>>,
+    min: Option<u64>, // min {x | x.is_some() && x in elements}
+    positive: usize,  // #{ x.is_some() && x in elements }
+    subtract: u64,
 }
 
 impl Bucket {
     fn new(chunk: &[u64]) -> Self {
         Self {
-            elements: chunk.to_vec(),
-            min: chunk.iter().min().copied().unwrap(),
+            elements: chunk.iter().map(|&x| Some(x)).collect(),
+            min: chunk.iter().min().copied(),
             positive: chunk.len(),
             subtract: 0,
         }

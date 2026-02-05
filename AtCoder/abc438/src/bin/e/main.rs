@@ -1,5 +1,7 @@
 use proconio::{input, marker::Usize1};
 
+use crate::doubling::{Doubling, Transition, Value};
+
 fn main() {
     input! {
         n: usize,
@@ -8,47 +10,109 @@ fn main() {
         queries: [(usize, Usize1); q],
     };
 
-    #[derive(Debug, Clone, Copy)]
-    struct S {
-        pos: usize,
-        total: usize,
+    struct Water(usize);
+
+    impl Value for Water {
+        fn op(&self, other: &Self) -> Self {
+            Water(self.0 + other.0)
+        }
     }
 
-    // doubling
-    let mut dp = {
-        let v = a
-            .iter()
-            .enumerate()
-            .map(|(i, &a)| S {
-                pos: a,
-                total: i + 1,
-            })
-            .collect::<Vec<_>>();
-        vec![v]
-    };
-    for i in 1..32 {
-        let mut v = Vec::new();
-        for p in 0..n {
-            let s = dp[i - 1][p];
-            let t = dp[i - 1][s.pos];
-            v.push(S {
-                pos: t.pos,
-                total: s.total + t.total,
-            });
-        }
-        dp.push(v);
-    }
+    let max_t = 1_000_000_000;
+    let db = Doubling::new(n, max_t, |i| Transition::new(a[i], Water(i + 1)));
 
     for (t, b) in queries {
-        let mut b = b;
-        let mut ans = 0;
-        for i in 0..32 {
-            if t >> i & 1 == 1 {
-                let s = dp[i][b];
-                b = s.pos;
-                ans += s.total;
+        let acc = db.fold(b, t, 0, |acc, x| acc + x.value.0);
+        println!("{}", acc);
+    }
+}
+
+#[allow(unused)]
+mod doubling {
+    #[derive(Debug, Clone)]
+    pub struct Doubling<V> {
+        transitions: Vec<Transition<V>>,
+        n_state: usize,
+        max_steps: usize,
+        log2_max_steps: usize,
+    }
+
+    #[derive(Debug, Clone)]
+    pub struct Transition<V> {
+        pub next: usize,
+        pub value: V,
+    }
+
+    impl<V> Transition<V> {
+        pub fn new(next: usize, value: V) -> Self {
+            Self { next, value }
+        }
+    }
+
+    pub trait Value {
+        fn op(&self, other: &Self) -> Self;
+    }
+
+    impl<V> Doubling<V>
+    where
+        V: Value,
+    {
+        pub fn new<F>(n_state: usize, max_steps: usize, step1: F) -> Self
+        where
+            F: Fn(usize) -> Transition<V>,
+        {
+            assert!(max_steps > 0);
+
+            let log2_max_steps = max_steps.ilog2() as usize;
+
+            let mut transitions = Vec::with_capacity(n_state * (log2_max_steps + 1));
+            for i in 0..n_state {
+                let t = step1(i);
+
+                assert!(t.next < n_state);
+
+                transitions.push(t);
+            }
+
+            for k in 1..=log2_max_steps {
+                let offset = n_state * (k - 1);
+                for i in 0..n_state {
+                    let t1 = &transitions[offset + i];
+                    let t2 = &transitions[offset + t1.next];
+                    transitions.push(Transition {
+                        next: t2.next,
+                        value: t1.value.op(&t2.value),
+                    });
+                }
+            }
+
+            Self {
+                transitions,
+                n_state,
+                max_steps,
+                log2_max_steps,
             }
         }
-        println!("{}", ans);
+
+        pub fn fold<A, F>(&self, start: usize, step: usize, init: A, f: F) -> A
+        where
+            F: Fn(A, &Transition<V>) -> A,
+        {
+            assert!(start < self.n_state);
+            assert!(step <= self.max_steps);
+
+            let mut i = start;
+            let mut acc = init;
+            for k in 0..=self.log2_max_steps {
+                if step >> k & 1 == 1 {
+                    let offset = self.n_state * k;
+                    let s = &self.transitions[offset + i];
+                    i = s.next;
+                    acc = f(acc, &s);
+                }
+            }
+
+            acc
+        }
     }
 }

@@ -17,24 +17,19 @@ fn main() {
         }
     }
 
-    let ans = if k == 0 {
-        a
-    } else {
-        let db = Doubling::new(n, k, |i| Transition::new(x[i], NoOp {}));
+    let db = Doubling::new(n, k, |i| Transition::new(x[i], NoOp {}));
 
-        // let mut ans = Vec::new();
-        // for i in 0..n {
-        //     let acc = db.fold(i, k, i, |_, t| t.next);
-        //     ans.push(a[acc]);
-        // }
-        // ans
+    // let mut ans = Vec::new();
+    // for i in 0..n {
+    //     let acc = db.fold(i, k, i, |_, t| t.next);
+    //     ans.push(a[acc]);
+    // }
 
-        db.fold_all(k, a, |acc, ts| {
-            assert_eq!(acc.len(), ts.len());
+    let ans = db.fold_all(k, a, |acc, ts| {
+        assert_eq!(acc.len(), ts.len());
 
-            ts.iter().map(|t| acc[t.next]).collect()
-        })
-    };
+        ts.iter().map(|t| acc[t.next]).collect()
+    });
 
     println!(
         "{}",
@@ -79,9 +74,11 @@ mod doubling {
         where
             F: Fn(usize) -> Transition<V>,
         {
-            assert!(max_steps > 0);
-
-            let log2_max_steps = max_steps.ilog2() as usize;
+            let log2_max_steps = if max_steps == 0 {
+                0
+            } else {
+                max_steps.ilog2() as usize
+            };
 
             let mut transitions = Vec::with_capacity(n_state * (log2_max_steps + 1));
             for i in 0..n_state {

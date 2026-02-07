@@ -18,18 +18,12 @@ fn main() {
     }
 
     let db = Doubling::new(n, k, |i| Transition::new(x[i], NoOp {}));
-
-    // let mut ans = Vec::new();
-    // for i in 0..n {
-    //     let acc = db.fold(i, k, i, |_, t| t.next);
-    //     ans.push(a[acc]);
-    // }
-
-    let ans = db.fold_all(k, a, |acc, ts| {
-        assert_eq!(acc.len(), ts.len());
-
-        ts.iter().map(|t| acc[t.next]).collect()
-    });
+    let mut ans = Vec::new();
+    // slow
+    for i in 0..n {
+        let acc = db.fold(i, k, i, |_, t| t.next);
+        ans.push(a[acc]);
+    }
 
     println!(
         "{}",
@@ -123,25 +117,6 @@ mod doubling {
                     let offset = self.n_state * k;
                     let t = &self.transitions[offset + i];
                     (i, acc) = (t.next, f(acc, &t));
-                }
-            }
-
-            acc
-        }
-
-        pub fn fold_all<A, F>(&self, step: usize, inits: Vec<A>, f: F) -> Vec<A>
-        where
-            F: Fn(Vec<A>, &[Transition<V>]) -> Vec<A>,
-        {
-            assert!(step <= self.max_steps);
-            assert!(inits.len() == self.n_state);
-
-            let mut acc = inits;
-            for k in 0..=self.log2_max_steps {
-                if step >> k & 1 == 1 {
-                    let offset = self.n_state * k;
-                    let transitions = &self.transitions[offset..(offset + self.n_state)];
-                    acc = f(acc, transitions);
                 }
             }
 
